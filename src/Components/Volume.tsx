@@ -43,7 +43,7 @@ export default function Volume() {
     }
     useEffect(()=>{
          getData();
-            })
+          
     },[period]);
 
     useEffect(()=>console.log(vollist),[vollist]
