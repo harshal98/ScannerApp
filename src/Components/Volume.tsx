@@ -10,7 +10,8 @@ type VolumePercent ={
 export default function Volume() {
     const [vollist,setVolList]=useState<VolumePercent[]>([])
     const [period,Setperiod] = useState("1d")
-    useEffect(()=>{
+
+    function getData(){
         let responses : Promise<AxiosResponse>[]=[];
         for(let x of FuturePairs){
             responses.push(axios.get(`https://api.binance.com/api/v3/klines?interval=${period}&limit=13&symbol=${x}`))
@@ -39,6 +40,9 @@ export default function Volume() {
                 else return 1 
             return 0}))      
         
+    }
+    useEffect(()=>{
+         getData();
             })
     },[period]);
 
@@ -57,6 +61,7 @@ export default function Volume() {
             <option>15m</option>
             <option>5m</option>
         </select>
+        <button onClick = {getData}>Reload</button>
     </div>
     
     <div>{vollist.map(item=> item.percent > 1.5 ? <div className="item ">{`${item.pair} ==> ${item.percent}`}</div>:undefined)}</div>
