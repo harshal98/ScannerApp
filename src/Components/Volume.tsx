@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import FuturePairs from "./FuturePairs"
 import axios, { AxiosResponse } from "axios";
 import "./Volume.css"
@@ -7,10 +7,12 @@ type VolumePercent ={
     //vol12 : []
     percent : number
 }
+
 export default function Volume() {
+    const ref1 = useRef<number>()
     const [vollist,setVolList]=useState<VolumePercent[]>([])
     const [period,Setperiod] = useState("1d")
-
+    const [timer,settimer] = useState<number>(0);
     function getData(){
         let responses : Promise<AxiosResponse>[]=[];
         for(let x of FuturePairs){
@@ -43,15 +45,30 @@ export default function Volume() {
         }
 
     useEffect(()=>{
-         getData();
-          
+        settimer(10);
+        //let  timer :number
+        const refreshdatatimer = setInterval(()=>{
+            clearInterval(ref1.current)
+            console.log("Refresh API");
+            ref1.current = setInterval(()=>{
+                console.log("inside timer update")
+                
+                settimer((prev)=>prev>0 ? prev -1 : 10);
+                
+            },1000)
+            getData();
+        },10000)
+         
+       
+        
+        return ()=>{clearInterval(refreshdatatimer)}
     },[period]);
 
     useEffect(()=>console.log(vollist),[vollist]
     )
   return (
     <>
-    <div ><b style={{color:"white" }}>Volume Percentage Daily  </b> 
+    <div ><b style={{color:"white" }}> Volume Percentage Daily  </b> 
         <select onChange={(e)=>
             {   console.log(e.target.value);
             
@@ -62,7 +79,7 @@ export default function Volume() {
             <option>15m</option>
             <option>5m</option>
         </select>
-        <button onClick = {getData}>Reload</button>
+        <button onClick = {getData}>Reloading in {timer}</button>
     </div>
     
     <div>{vollist.map(item=> item.percent > 1.5 ? <div className="item ">{`${item.pair} ==> ${item.percent}`}</div>:undefined)}</div>
