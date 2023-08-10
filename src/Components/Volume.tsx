@@ -15,7 +15,7 @@ export default function Volume() {
         let responses : Promise<AxiosResponse>[]=[];
         for(let x of FuturePairs){
             responses.push(axios.get(`https://api.binance.com/api/v3/klines?interval=${period}&limit=13&symbol=${x}`))
-        }
+        };
         axios.all(responses).then(responses=>{
             let allList :VolumePercent[] = []
             responses.forEach((response:AxiosResponse)=>{
@@ -38,9 +38,10 @@ export default function Volume() {
 
               setVolList(allList.sort((i,j)=>{if(i.percent > j.percent) return -1 
                 else return 1 
-            return 0}))      
+            return 0}))})
         
-    }
+        }
+
     useEffect(()=>{
          getData();
           
@@ -68,3 +69,4 @@ export default function Volume() {
     </>
   )
 }
+
