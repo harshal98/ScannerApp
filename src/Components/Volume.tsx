@@ -25,10 +25,10 @@ export default function Volume() {
             console.log(volarray.slice(0,6).reduce((accumulator, currentValue) =>accumulator + currentValue ));
 
             let volpercent :VolumePercent = {
-                pair :response.config.url != undefined?response.config.url.substring(66):"",
+                pair :response.config.url != undefined?response.config.url.split("&")[2].substring(7):"",
                 
                 
-                percent : volarray.slice(0,7).reduce((i,j)=>i+j)/volarray.slice(7,13).reduce((i,j)=>i+j)
+                percent : Number((volarray.slice(0,7).reduce((i,j)=>i+j) / volarray.slice(7,13).reduce((i,j)=>i+j) * 100).toFixed(2))
             }
                     allList.push(volpercent)
 
@@ -46,7 +46,7 @@ export default function Volume() {
     )
   return (
     <>
-    <div>Volume Percentage Daily 
+    <div ><b style={{color:"white" }}>Volume Percentage Daily  </b> 
         <select onChange={(e)=>
             {   console.log(e.target.value);
             

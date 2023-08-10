@@ -36,14 +36,17 @@
     display: list-item;
     list-style-position: inside;
     padding: 10px 15px;
-    
-    &:nth-child(odd) {
+    background-color: #efefef;
+    border-top: 50px;
+    /* &:nth-child(odd) {
       background-color: #efefef;
-    }
+    } */
 
   }
 
- 
+  body {
+    background: linear-gradient(35deg, red, purple);
+  }
   
   /* <select> styles */
   select {
