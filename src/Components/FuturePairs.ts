@@ -77,8 +77,6 @@ export default [
 '1INCHUSDT',
 'LTCUSDT',
 'XVGUSDT',
-'ETHUSDT',
 'ATOMUSDT',
-'AAVEUSDT',
-'BTCUSDT'
+'AAVEUSDT'
 ]

@@ -1,10 +1,17 @@
-//import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 //import Bollinger from "./Components/BollingerBands"
 //import Macd from "./Components/Macd"
+import Bollinger from "./Components/BollingerBands"
+import DailyPercent, { MemoizedDailyPercent } from "./Components/DailyPercent"
+import FuturePairs from "./Components/FuturePairs"
+import RateofChange from "./Components/RateofChange"
 import Volume from "./Components/Volume"
+import TestComponent from "./Components/testComponent"
+
 
 
 function App() {
+ 
  
 //  const [reload,setreload]=useState(false)
 
@@ -18,13 +25,13 @@ function App() {
 //   //  return !prev}),50000})
 //  },[reload])
  
- 
+  //let memobj =  useMemo(()=>{return FuturePairs.map(item=>{return {pair:item}})},[])
   return (
-    <>
-     {/* <Macd></Macd> */}
-     {/* <Bollinger></Bollinger> */}
-     <Volume></Volume>
-    </>
+    
+      <>
+      <Bollinger></Bollinger>
+      </>
+   
   )
 }
 
