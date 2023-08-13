@@ -2,8 +2,7 @@ import { BollingerBands } from '@debut/indicators'
 import { useEffect, useRef, useState } from 'react';
 
 
-import axios from 'axios';
-import FuturePairs from './FuturePairs';
+
 import { get24hr, getData } from './GetData';
 import  "./BollingerBands.css"
 type BBscanner = {

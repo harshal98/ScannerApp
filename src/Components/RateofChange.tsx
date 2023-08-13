@@ -18,7 +18,7 @@ export default function RateofChange() {
   useEffect(()=>{
     
     let temp :ROCtype[]=[]
-    getData(4).then((response : {pair:string , data : number[]}[])=>{
+    getData(4).then((response :any)=>{
       
       
       console.log(response.length)

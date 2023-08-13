@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from "react"
+
 //import Bollinger from "./Components/BollingerBands"
 //import Macd from "./Components/Macd"
 import Bollinger from "./Components/BollingerBands"
-import DailyPercent, { MemoizedDailyPercent } from "./Components/DailyPercent"
-import FuturePairs from "./Components/FuturePairs"
-import RateofChange from "./Components/RateofChange"
-import Volume from "./Components/Volume"
-import TestComponent from "./Components/testComponent"
+// import DailyPercent, { MemoizedDailyPercent } from "./Components/DailyPercent"
+// import FuturePairs from "./Components/FuturePairs"
+// import RateofChange from "./Components/RateofChange"
+// import Volume from "./Components/Volume"
+// import TestComponent from "./Components/testComponent"
 
 
 

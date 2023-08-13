@@ -1,10 +1,10 @@
 import axios from "axios";
 
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export default function TestComponent() {
     const memoobj = useMemo(async ()=> await getData(),[]);
-    let data = []
+    let data:any= []
     const [res,setres]=useState<any[]>()    
 
     async function getData() {
