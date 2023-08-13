@@ -4,12 +4,16 @@ import { useEffect, useRef, useState } from 'react';
 
 
 import { get24hr, getData } from './GetData';
-import  "./BollingerBands.css"
+
+import "./Volume.css"
+import "./BollingerBands.css"
 type BBscanner = {
   pair : string
   //bblist : number[];
-  max : number
-  current : number
+  max : { upper:number , middle : number , lower : number},
+  maxindex: number,
+  min : { upper:number , middle : number , lower : number},
+  minindex: number,
   percent24? : number
 }
 
@@ -24,20 +28,35 @@ function Bollinger() {
   async function generateBB(response : any){
       
      getData(4,period,100).then((data)=>{ 
-       let closearray : any[] = []
+       let closearray : { upper:number , middle : number , lower : number} [] = []
        let temp : BBscanner[] = [];
        data.forEach(x =>{        
         
         let bb = new BollingerBands()
+        
         closearray = x.data.map(close=>bb.nextValue(Number(close))).reverse()
-        closearray = closearray.slice(0, closearray.indexOf(undefined))
-        closearray = closearray.map((item)=>item.upper - item.lower)
-        //console.log(closearray);
+        closearray = closearray.slice(0, closearray.length - 19)
+        //closearray = closearray.map((item)=> item)
+        
+        //if (x.pair == "RNDRUSDT") console.log(`${x.pair}`,closearray);
         
         //setdatalist(closearray)
         let max = closearray[0]
-        for (let x of closearray ){if(max<x) max = x;}
-        temp.push({pair : x.pair, current : closearray[0] ,max : max });
+        let maxindex = 0
+        for (let i = 0;i <closearray.length -1;i++){if((max.upper - max.lower)< closearray[i].upper - closearray[i].lower) { max = closearray[i]; maxindex = i}
+        
+         
+      }
+
+      //if (x.pair == "RNDRUSDT") console.log(`${x.pair} ==> max`,max,maxindex);
+        
+        let min = closearray[maxindex]
+        let minindex = maxindex
+        for (let i = minindex - 1 ;i >=0;i--){if((min.upper - min.lower)>closearray[i].upper - closearray[i].lower) {min = closearray[i]; minindex = i} ;}
+
+        //if (x.pair == "RNDRUSDT") console.log(`${x.pair} ==> min`,min,minindex)
+        
+        temp.push({pair : x.pair, min : min ,max : max , maxindex : maxindex ,minindex : minindex});
         })
         
         temp = temp.map((itemp)=>{
@@ -82,12 +101,13 @@ function Bollinger() {
     return ()=>{
       clearInterval (refreshinterval);
       setreload(10)
-      console.log("const refreshinterval cleared");
+      //console.log("const refreshinterval cleared");
       }
     
    },[period]);
 
- 
+  //  useEffect(()=>//console.log(BBscannerobj)
+  //  )
 
 
   return (
@@ -95,27 +115,34 @@ function Bollinger() {
     <div>
       <div style={{fontSize:"20px", position:"inherit"}}> Reload in : {reload}</div>
       <select className='container' onChange={(e)=>
-            {   console.log(e.target.value);
+            {   //console.log(e.target.value);
             
-                setperiod(e.target.value.toString())}} defaultValue={"1d"}>
+                setperiod(e.target.value.toString())}} defaultValue={"1h"}>
             <option>1d</option>
             <option>4h</option>
             <option>1h</option>
             <option>15m</option>
             <option>5m</option>
         </select>
-      <div className="container" style={{maxWidth:"1000px"}}>
+      <div className="container">
         <table className='responsive-table'>
         <thead>
         <tr>
             <th>Pair</th>
             <th>Daily%</th>
+            <th>MaxIndex</th>
+            <th>MinIndex</th>
             <th>BB%</th>
         </tr>
         </thead>
         <tbody>
-          {BBscannerobj.map(item=> { if(item.max  > item.current *3)
-    return <tr><td>{item.pair}</td><td>{item.percent24}</td><td>{Number(item.max/item.current*100).toFixed(0)}</td></tr>})}
+          {BBscannerobj.map(item=> { if(item.max.upper-item.max.lower  > (item.min.upper-item.min.lower )* 3 && item.max.upper > item.min.upper && item.max.lower < item.min.lower )
+    return <tr><td>{item.pair}</td>
+    <td>{item.percent24}</td>
+    <td>{item.maxindex}</td>
+    <td>{item.minindex}</td>
+    <td>{Number((item.max.upper-item.max.lower)  / (item.min.upper-item.min.lower)*100).toFixed(0)}</td>
+    </tr>})}
     </tbody>
     </table>
     </div>
