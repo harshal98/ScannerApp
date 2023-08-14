@@ -14,14 +14,16 @@ type BBscanner = {
   maxindex: number,
   min : { upper:number , middle : number , lower : number},
   minindex: number,
-  percent24? : number
+  percent24? : number,
+  current : { upper:number , middle : number , lower : number}
+  lastcandlecloseprice : number
 }
 
 function Bollinger() {
  
  const timer = useRef(0)  
  const [reload,setreload] = useState(10)
- const [period,setperiod] = useState("1h")
+ const [period,setperiod] = useState("1m")
   //const [bbval,setbbval] = useState<any[]>([])
   const [BBscannerobj , SetBBscannerobj] = useState<BBscanner[]>([])
 
@@ -32,7 +34,7 @@ function Bollinger() {
        let temp : BBscanner[] = [];
        data.forEach(x =>{        
         
-        let bb = new BollingerBands()
+        let bb = new BollingerBands(20,2)
         
         closearray = x.data.map(close=>bb.nextValue(Number(close))).reverse()
         closearray = closearray.slice(0, closearray.length - 19)
@@ -56,7 +58,7 @@ function Bollinger() {
 
         //if (x.pair == "RNDRUSDT") console.log(`${x.pair} ==> min`,min,minindex)
         
-        temp.push({pair : x.pair, min : min ,max : max , maxindex : maxindex ,minindex : minindex});
+        temp.push({pair : x.pair, min : min ,max : max , maxindex : maxindex ,minindex : minindex , current : closearray[0] , lastcandlecloseprice :Number(x.data[x.data.length -2])});
         })
         
         temp = temp.map((itemp)=>{
@@ -113,7 +115,7 @@ function Bollinger() {
   return (
     
     <div>
-      <div style={{fontSize:"20px", position:"inherit"}}> Reload in : {reload}</div>
+      <div style={{fontSize:"20px", position:"inherit", color:"white"}}> Reload in : {reload}</div>
       <select className='container' onChange={(e)=>
             {   //console.log(e.target.value);
             
@@ -136,14 +138,22 @@ function Bollinger() {
         </tr>
         </thead>
         <tbody>
-          {BBscannerobj.map(item=> { if(item.max.upper-item.max.lower  > (item.min.upper-item.min.lower )* 3 && item.max.upper > item.min.upper && item.max.lower < item.min.lower )
-    return <tr><td>{item.pair}</td>
-    <td>{item.percent24}</td>
-    <td>{item.maxindex}</td>
-    <td>{item.minindex}</td>
-    <td>{Number((item.max.upper-item.max.lower)  / (item.min.upper-item.min.lower)*100).toFixed(0)}</td>
-    </tr>})}
-    </tbody>
+          {BBscannerobj.map(item=> { 
+            if(
+              item.max.upper-item.max.lower  > (item.min.upper-item.min.lower )* 3 
+              //&& item.max.upper > item.min.upper 
+              //&& item.max.lower < item.min.lower 
+              && item.minindex < 10
+              && item.lastcandlecloseprice > item.current.middle
+              )
+                return <tr key={item.pair}><td>{item.pair}</td>
+                <td>{item.percent24}</td>
+                <td>{item.maxindex}</td>
+                <td>{item.minindex}</td>
+                <td>{Number((item.max.upper-item.max.lower)  / (item.min.upper-item.min.lower)*100).toFixed(0)}</td>
+                {/* <td>{`${item.lastcandlecloseprice} > ${item.current.middle}`}</td> */}
+                </tr>})}
+        </tbody>
     </table>
     </div>
      
