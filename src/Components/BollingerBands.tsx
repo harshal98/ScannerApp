@@ -144,7 +144,7 @@ function Bollinger() {
               //&& item.max.upper > item.min.upper 
               //&& item.max.lower < item.min.lower 
               && item.minindex < 10
-              && item.lastcandlecloseprice > item.current.middle
+              && item.lastcandlecloseprice > item.min.upper
               )
                 return <tr key={item.pair}><td>{item.pair}</td>
                 <td>{item.percent24}</td>
