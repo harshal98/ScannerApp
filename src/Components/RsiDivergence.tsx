@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { get24hr, getData } from "./GetData";
 import { RSI } from "@debut/indicators";
 import "./RsiDivergence.css";
+import useTimer from "../hooks/useTimer";
 
 type RsiList = {
   pair: string;
@@ -22,6 +23,9 @@ function RsiDivergence() {
       priceChangePercent: number;
     }[]
   >([]);
+
+  const { reload, SetTimerRestart } = useTimer(10);
+
   function getRsi(period: string) {
     getData(4, period, 200).then((data) => {
       let temp: RsiList[] = [];
@@ -32,11 +36,11 @@ function RsiDivergence() {
         closearray = item.data.map((x) => {
           return rsi.nextValue(Number(x));
         });
-        closearray = closearray.reverse().slice(1, 50); //closearray.length - 14 );
+        closearray = closearray.reverse().slice(1, closearray.length - 14);
 
         let max1 = closearray[0];
         let max1index = 0;
-        let datarev = item.data.reverse().slice(1, 50);
+        let datarev = item.data.reverse().slice(1, item.data.length);
         for (let i = 0; i < closearray.length - 1; i++) {
           if (max1 > closearray[i]) {
             max1 = closearray[i];
@@ -44,8 +48,8 @@ function RsiDivergence() {
           }
         }
 
-        let max2 = closearray[max1index - 1];
-        let max2index = max1index - 1;
+        let max2 = closearray[max1index - 1 - 10];
+        let max2index = max1index - 1 - 10;
         for (let i = max2index - 1; i >= 0; i--) {
           if (max2 > closearray[i]) {
             max2 = closearray[i];
@@ -88,7 +92,11 @@ function RsiDivergence() {
     let periodchange = 0;
     if (data24.length != 0) {
       getRsi(period);
-      periodchange = setInterval(() => getRsi(period), 10000);
+      SetTimerRestart();
+      periodchange = setInterval(() => {
+        getRsi(period);
+        SetTimerRestart();
+      }, 10000);
     }
 
     return () => {
@@ -98,7 +106,7 @@ function RsiDivergence() {
 
   return (
     <div className="container">
-      
+      <div> Reload in {reload}</div>
       <select
         onChange={(e) => {
           //console.log(e.target.value);
@@ -128,8 +136,8 @@ function RsiDivergence() {
               item.max1 < 40 &&
               item.max2 > item.max1 &&
               item.cpmax1 > item.cpmax2 &&
-              //item.max2index < 10 &&
-              item.max1index > 10 + item.max2index //&&
+              item.max2index < 10
+              //item.max1index > 10 + item.max2index //&&
               //item.max1index < item.max2index + 30
             )
               return (
