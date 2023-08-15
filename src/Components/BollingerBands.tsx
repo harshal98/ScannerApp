@@ -1,10 +1,11 @@
 import { BollingerBands } from "@debut/indicators";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { get24hr, getData } from "./GetData";
 
 import "./Volume.css";
 import "./BollingerBands.css";
+import useTimer from "../hooks/useTimer";
 type BBscanner = {
   pair: string;
   //bblist : number[];
@@ -18,8 +19,7 @@ type BBscanner = {
 };
 
 function Bollinger() {
-  const timer = useRef(0);
-  const [reload, setreload] = useState(10);
+  const [reload, setreload] = useTimer(10);
   const [period, setperiod] = useState("1h");
   //const [bbval,setbbval] = useState<any[]>([])
   const [BBscannerobj, SetBBscannerobj] = useState<BBscanner[]>([]);
@@ -102,26 +102,20 @@ function Bollinger() {
     });
   }
 
-  
-
   useEffect(() => {
+    setreload();
     let refreshinterval: number = 0;
     get24hr().then((response: any) => {
       generateBB(response);
       refreshinterval = setInterval(() => {
-        clearInterval(timer.current);
-
-        setreload(10);
+        setreload();
         generateBB(response);
-        timer.current = setInterval(() => {
-          setreload((prev) => prev - 1);
-        }, 1000);
       }, 10000);
     });
 
     return () => {
       clearInterval(refreshinterval);
-      setreload(10);
+
       //console.log("const refreshinterval cleared");
     };
   }, [period]);
@@ -169,7 +163,7 @@ function Bollinger() {
                 //&& item.max.upper > item.min.upper
                 //&& item.max.lower < item.min.lower
                 item.minindex < 10 &&
-                item.lastcandlecloseprice > item.min.upper
+                item.lastcandlecloseprice > item.min.middle
               )
                 return (
                   <tr key={item.pair}>

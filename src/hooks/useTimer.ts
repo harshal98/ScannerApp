@@ -19,7 +19,7 @@ function useTimer(period: number) {
     }, 1000);
   }, []);
 
-  return { reload, SetTimerRestart };
+  return [reload, SetTimerRestart] as const;
 }
 
 export default useTimer;

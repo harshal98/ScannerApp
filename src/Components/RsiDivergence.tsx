@@ -24,7 +24,7 @@ function RsiDivergence() {
     }[]
   >([]);
 
-  const { reload, SetTimerRestart } = useTimer(10);
+  const [reload, SetTimerRestart] = useTimer(10);
 
   function getRsi(period: string) {
     getData(4, period, 200).then((data) => {
@@ -76,7 +76,6 @@ function RsiDivergence() {
         if (i.h24percent < j.h24percent) return 1;
         else return -1;
       });
-      console.log(temp);
 
       setrsilist(temp);
     });
