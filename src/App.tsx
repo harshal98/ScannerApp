@@ -74,9 +74,9 @@ function App() {
     <Box sx={{ width: '100%' }}>
     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
       <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-        <Tab label="Item One" />
-        <Tab label="Item Two"  />
-        <Tab label="Item Three"  />
+        <Tab label="BollingerBands" />
+        <Tab label="Rsi Divergence"  />
+        <Tab label="Percentage Change"  />
       </Tabs>
     </Box>
     <CustomTabPanel value={value} index={0}>
