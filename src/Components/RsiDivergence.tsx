@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { get24hr, getData } from "./GetData";
 import { RSI } from "@debut/indicators";
-import "./RsiDivergence.css";
+//import "./RsiDivergence.css";
 import useTimer from "../hooks/useTimer";
 
 type RsiList = {

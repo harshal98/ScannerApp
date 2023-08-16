@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 
 import { get24hr, getData } from "./GetData";
 
-import "./Volume.css";
-import "./BollingerBands.css";
+//import "./Volume.css";
+//import "./BollingerBands.css";
 import useTimer from "../hooks/useTimer";
 type BBscanner = {
   pair: string;
