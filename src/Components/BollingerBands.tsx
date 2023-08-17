@@ -89,25 +89,21 @@ function Bollinger() {
         return { ...itemp, percent24: p };
       });
 
-      SetBBscannerobj(temp);
+      temp = temp.sort((i, j) => {
+        if (
+          i.percent24 != undefined && j.percent24 != undefined
+            ? i.percent24 > j.percent24
+            : false
+        )
+          return ( bbfilter  == "Long" ? -1: 1);
+        else return  (bbfilter  == "Long" ? 1: -1);
+        return 0;
+      });
+  
+      SetBBscannerobj(temp)
     });
   }
 
-  useEffect(()=>{
-    let temp = [...BBscannerobj]
-    temp = temp.sort((i, j) => {
-      if (
-        i.percent24 != undefined && j.percent24 != undefined
-          ? i.percent24 > j.percent24
-          : false
-      )
-        return ( bbfilter  == "Long" ? -1: 1);
-      else return  (bbfilter  == "Long" ? 1: -1);
-      return 0;
-    });
-
-    SetBBscannerobj(temp)
-  },[bbfilter,reload])
 
   useEffect(() => {
     setreload();
