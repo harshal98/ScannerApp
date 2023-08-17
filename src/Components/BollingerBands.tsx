@@ -8,28 +8,28 @@ import "./BollingerBands.css";
 import useTimer from "../hooks/useTimer";
 type BBscanner = {
   pair: string;
-  //bblist : number[];
   max: { upper: number; middle: number; lower: number };
   maxindex: number;
   min: { upper: number; middle: number; lower: number };
   minindex: number;
   percent24?: number;
   current: { upper: number; middle: number; lower: number };
-  lastcandlecloseprice: number;
-  lastprice : string
+  maxcandlecloseaftermin: number;
+  lastprice: number;
 };
 
 function Bollinger() {
   const [reload, setreload] = useTimer(10);
   const [period, setperiod] = useState("1h");
-  const [bbfilter,setbbfilter] = useState<string>("Long")
+  const [bbfilter, setbbfilter] = useState<string>("Long");
   const [BBscannerobj, SetBBscannerobj] = useState<BBscanner[]>([]);
 
   async function generateBB(response: any) {
     getData(4, period, 100).then((data) => {
-      let closearray: { upper: number; middle: number; lower: number }[] = [];
       let temp: BBscanner[] = [];
       data.forEach((x) => {
+        let closearray: { upper: number; middle: number; lower: number }[] = [];
+
         let bb = new BollingerBands(20, 2);
 
         closearray = x.data
@@ -67,7 +67,14 @@ function Bollinger() {
           }
         }
 
-        //if (x.pair == "RNDRUSDT") console.log(`${x.pair} ==> min`,min,minindex)
+        let maxcandlecloseaftermin = 0;
+        let closepricearray = x.data.reverse();
+        for (let i = 0 + 1; i < minindex; i++) {
+          if (maxcandlecloseaftermin < Number(closepricearray[i]))
+            maxcandlecloseaftermin = Number(closepricearray[i]);
+        }
+
+        //if (x.pair == "ACHUSDT") console.log(x.data);
 
         temp.push({
           pair: x.pair,
@@ -76,8 +83,8 @@ function Bollinger() {
           maxindex: maxindex,
           minindex: minindex,
           current: closearray[0],
-          lastcandlecloseprice: Number(x.data[x.data.length - 2]),
-          lastprice : x.data[x.data.length - 1]
+          maxcandlecloseaftermin,
+          lastprice: Number(closepricearray[0]),
         });
       });
 
@@ -95,15 +102,14 @@ function Bollinger() {
             ? i.percent24 > j.percent24
             : false
         )
-          return ( bbfilter  == "Long" ? -1: 1);
-        else return  (bbfilter  == "Long" ? 1: -1);
+          return bbfilter == "Long" ? -1 : 1;
+        else return bbfilter == "Long" ? 1 : -1;
         return 0;
       });
-  
-      SetBBscannerobj(temp)
+
+      SetBBscannerobj(temp);
     });
   }
-
 
   useEffect(() => {
     setreload();
@@ -123,34 +129,50 @@ function Bollinger() {
     };
   }, [period]);
 
-  //  useEffect(()=>//console.log(BBscannerobj)
-  //  )
-      function filterBB(item: BBscanner){
-        if(bbfilter == "Long"){
-          if(
+  // useEffect(() => console.log(BBscannerobj), [BBscannerobj]);
+  function filterBB(item: BBscanner) {
+    if (bbfilter == "Long") {
+      // if (item.pair == "ACHUSDT") {
+      //   console.log(item.pair);
+
+      //   console.log(
+      //     item.max.upper - item.max.lower >
+      //       (item.min.upper - item.min.lower) * 3
+      //   );
+      //   console.log(Number(item.lastprice) < item.min.upper * 1.01);
+      //   console.log(Number(item.lastprice) > item.min.middle, "???");
+      //   console.log(item.minindex < 30);
+      //   console.log(item.maxcandlecloseaftermin > item.min.upper);
+      // }
+
+      if (
         item.max.upper - item.max.lower >
-                  (item.min.upper - item.min.lower) * 3 &&
-                //&& item.max.upper > item.min.upper
-                //&& item.max.lower < item.min.lower
-                Number(item.lastprice) < item.min.upper * 1.01 &&  Number(item.lastprice) >  item.min.middle &&
-                item.minindex < 20 &&
-                item.lastcandlecloseprice > item.min.upper)
-              return true;
-               else return false
-            }
-            if((bbfilter == "Short")) {
-              if(
-                item.max.upper - item.max.lower >
-                          (item.min.upper - item.min.lower) * 3 &&
-                        //&& item.max.upper > item.min.upper
-                        //&& item.max.lower < item.min.lower
-                        Number(item.lastprice) > item.min.lower * 0.99 && Number(item.lastprice) <  item.min.middle &&
-                        item.minindex < 20 &&
-                        item.lastcandlecloseprice < item.min.lower)
-                        return true
-                else return false
-            }
-      }
+          (item.min.upper - item.min.lower) * 3 &&
+        //&& item.max.upper > item.min.upper
+        //&& item.max.lower < item.min.lower
+        Number(item.lastprice) < item.min.upper * 1.01 &&
+        Number(item.lastprice) > item.min.middle &&
+        item.minindex < 30 &&
+        item.maxcandlecloseaftermin > item.min.upper
+      )
+        return true;
+      else return false;
+    }
+    if (bbfilter == "Short") {
+      if (
+        item.max.upper - item.max.lower >
+          (item.min.upper - item.min.lower) * 3 &&
+        //&& item.max.upper > item.min.upper
+        //&& item.max.lower < item.min.lower
+        Number(item.lastprice) > item.min.lower * 0.99 &&
+        Number(item.lastprice) < item.min.middle &&
+        item.minindex < 20 &&
+        item.maxcandlecloseaftermin < item.min.lower
+      )
+        return true;
+      else return false;
+    }
+  }
   return (
     <div>
       <div style={{ fontSize: "20px", position: "inherit", color: "white" }}>
@@ -172,8 +194,20 @@ function Bollinger() {
         <option>15m</option>
         <option>5m</option>
       </select>
-      <button style={{width:"100px",height:"50px", backgroundColor: bbfilter == "Long" ?"#50C878":"#D03D33" , border:"0"}} onClick={()=>{if(bbfilter == "Long") setbbfilter("Short") 
-      else setbbfilter("Long")}}>{bbfilter}</button>
+      <button
+        style={{
+          width: "100px",
+          height: "50px",
+          backgroundColor: bbfilter == "Long" ? "#50C878" : "#D03D33",
+          border: "0",
+        }}
+        onClick={() => {
+          if (bbfilter == "Long") setbbfilter("Short");
+          else setbbfilter("Long");
+        }}
+      >
+        {bbfilter}
+      </button>
       <div className="container">
         <table className="responsive-table">
           <thead>
@@ -187,7 +221,7 @@ function Bollinger() {
           </thead>
           <tbody>
             {BBscannerobj.map((item) => {
-              if (filterBB(item))              
+              if (filterBB(item))
                 return (
                   <tr key={item.pair}>
                     <td>{item.pair}</td>
