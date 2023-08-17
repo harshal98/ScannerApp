@@ -89,20 +89,25 @@ function Bollinger() {
         return { ...itemp, percent24: p };
       });
 
-      temp = temp.sort((i, j) => {
-        if (
-          i.percent24 != undefined && j.percent24 != undefined
-            ? i.percent24 > j.percent24
-            : false
-        )
-          return -1;
-        else return 1;
-        return 0;
-      });
-
       SetBBscannerobj(temp);
     });
   }
+
+  useEffect(()=>{
+    let temp = [...BBscannerobj]
+    temp = temp.sort((i, j) => {
+      if (
+        i.percent24 != undefined && j.percent24 != undefined
+          ? i.percent24 > j.percent24
+          : false
+      )
+        return ( bbfilter  == "Long" ? -1: 1);
+      else return  (bbfilter  == "Long" ? 1: -1);
+      return 0;
+    });
+
+    SetBBscannerobj(temp)
+  },[bbfilter,reload])
 
   useEffect(() => {
     setreload();
@@ -131,7 +136,8 @@ function Bollinger() {
                   (item.min.upper - item.min.lower) * 3 &&
                 //&& item.max.upper > item.min.upper
                 //&& item.max.lower < item.min.lower
-                Number(item.lastprice) < item.min.upper * 1.02 &&
+                Number(item.lastprice) < item.min.upper * 1.01 &&
+                item.maxindex < 20 &&
                 item.lastcandlecloseprice > item.min.upper)
               return true;
                else return false
@@ -143,6 +149,7 @@ function Bollinger() {
                         //&& item.max.upper > item.min.upper
                         //&& item.max.lower < item.min.lower
                         Number(item.lastprice) > item.min.lower * 0.99 &&
+                        item.maxindex < 20 &&
                         item.lastcandlecloseprice < item.min.lower)
                         return true
                 else return false
