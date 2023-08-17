@@ -137,7 +137,7 @@ function Bollinger() {
                 //&& item.max.upper > item.min.upper
                 //&& item.max.lower < item.min.lower
                 Number(item.lastprice) < item.min.upper * 1.01 &&
-                item.maxindex < 20 &&
+                item.minindex < 20 &&
                 item.lastcandlecloseprice > item.min.upper)
               return true;
                else return false
@@ -149,7 +149,7 @@ function Bollinger() {
                         //&& item.max.upper > item.min.upper
                         //&& item.max.lower < item.min.lower
                         Number(item.lastprice) > item.min.lower * 0.99 &&
-                        item.maxindex < 20 &&
+                        item.minindex < 20 &&
                         item.lastcandlecloseprice < item.min.lower)
                         return true
                 else return false
