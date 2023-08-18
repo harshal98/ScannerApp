@@ -1,4 +1,5 @@
 export default [
+    'BLZUSDT',
     'OXTUSDT',
     'BNTUSDT',
     'C98USDT',
