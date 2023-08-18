@@ -33,7 +33,7 @@ function App() {
   return (
     <>
       {" "}
-      <div className="item">
+      <div className="item" style={{display:"flex",justifyContent:"stretch"}}>
         <p>Bollinger Bands</p>
         <label className="switch">
           <input

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { getData } from "./GetData";
 import axios, { AxiosResponse } from "axios";
 import FuturePairs from "./FuturePairs";
-import "./Volume.css"
+// import "./Volume.css"
 type ROCtype={
   pair : string;
   currRoc : number;
