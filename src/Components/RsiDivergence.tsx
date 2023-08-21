@@ -110,9 +110,9 @@ function RsiDivergence() {
     };
   }, [period, data24]);
 
-  useEffect(() => {
-    console.log(rsilist);
-  }, [rsilist]);
+  // useEffect(() => {
+  //   console.log(rsilist);
+  // }, [rsilist]);
   return (
     <div className="container">
       <div
