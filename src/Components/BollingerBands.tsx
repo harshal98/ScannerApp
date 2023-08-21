@@ -176,11 +176,12 @@ function Bollinger() {
         //&& item.max.lower < item.min.lower
         Number(item.lastprice) < item.min.upper * 1.02 &&
         Number(item.lastprice) > item.min.middle &&
-        //item.minindex < 30 &&
-        item.maxcandlecloseaftermin > item.min.upper &&
-        item.percent24 != undefined
-          ? item.percent24 > 0
-          : false
+        item.minindex < 30 &&
+        item.maxcandlecloseaftermin > item.min.upper
+        // &&
+        // item.percent24 != undefined
+        //   ? item.percent24 > 0
+        //   : false
       )
         return true;
       else return false;
@@ -230,6 +231,7 @@ function Bollinger() {
           <option>1h</option>
           <option>15m</option>
           <option>5m</option>
+          <option>1m</option>
         </select>
         <button
           style={{

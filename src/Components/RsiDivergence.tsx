@@ -13,6 +13,8 @@ type RsiList = {
   max1index: number;
   max2index: number;
   h24percent: number;
+
+  lastprice: number;
 };
 function RsiDivergence() {
   const [rsilist, setrsilist] = useState<RsiList[]>([]);
@@ -59,6 +61,10 @@ function RsiDivergence() {
         let h24percent = data24.filter((item24) => {
           if (item24.pair == item.pair) return true;
         })[0].priceChangePercent;
+
+        // let max2price = Number(item.data[max2index + 1]);
+
+        let lastprice = Number(item.data[0]);
         temp.push({
           pair: item.pair,
           max1: max1,
@@ -69,6 +75,7 @@ function RsiDivergence() {
           max1index,
           max2index,
           h24percent,
+          lastprice,
         });
       });
 
@@ -103,39 +110,56 @@ function RsiDivergence() {
     };
   }, [period, data24]);
 
+  useEffect(() => {
+    console.log(rsilist);
+  }, [rsilist]);
   return (
     <div className="container">
-      <div> Reload in {reload}</div>
-      <select
-        onChange={(e) => {
-          //console.log(e.target.value);
-
-          setperiod(e.target.value.toString());
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
         }}
-        defaultValue={"1h"}
       >
-        <option>1d</option>
-        <option>4h</option>
-        <option>1h</option>
-        <option>15m</option>
-        <option>5m</option>
-      </select>
+        {" "}
+        <h3>Reload in {reload}</h3>
+        <select
+          onChange={(e) => {
+            //console.log(e.target.value);
+
+            setperiod(e.target.value.toString());
+          }}
+          defaultValue={"1h"}
+          style={{ padding: 10, margin: 10, width: 100 }}
+          className="container"
+        >
+          <option>1d</option>
+          <option>4h</option>
+          <option>1h</option>
+          <option>15m</option>
+          <option>5m</option>
+        </select>
+      </div>
       <table className="rwd-table">
         <tbody>
           <tr>
             <th>Pair</th>
             <th>24Hr%</th>
-            <th>RsiMax1</th>
+            {/* <th>RsiMax1</th> */}
             <th>RsiMax1Index</th>
-            <th>RsiMax2</th>
+            {/* <th>RsiMax2</th> */}
             <th>RsiMax2Index</th>
+            <th>Max2Price</th>
+            <th>Lastprice</th>
           </tr>
           {rsilist.map((item) => {
             if (
+              item.max1index < 80 &&
               item.max1 < 40 &&
               item.max2 > item.max1 &&
               item.cpmax1 > item.cpmax2 &&
-              item.max2index < 10
+              item.max2index < 50 &&
+              item.cpmax2 > item.lastprice * 0.995
               //item.max1index > 10 + item.max2index //&&
               //item.max1index < item.max2index + 30
             )
@@ -143,10 +167,12 @@ function RsiDivergence() {
                 <tr>
                   <td data-th="Pair">{item.pair}</td>
                   <td data-th="24Hr%">{item.h24percent}</td>
-                  <td data-th="RsiMax1">{item.max1}</td>
+                  {/* <td data-th="RsiMax1">{item.max1}</td> */}
                   <td data-th="RsiMax1Index">{item.max1index}</td>
-                  <td data-th="RsiMax2">{item.max2}</td>
+                  {/* <td data-th="RsiMax2">{item.max2}</td> */}
                   <td data-th="RsiMax2Index">{item.max2index}</td>
+                  <td data-th="Max2Price">{item.cpmax2}</td>
+                  <td data-th="Max2Price">{item.lastprice}</td>
                 </tr>
               );
           })}
