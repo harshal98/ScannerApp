@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { get24hr, getData } from "./GetData";
 
 // import "./Volume.css";
-// import "./BollingerBands.css";
+import "./BollingerBands.css";
 import useTimer from "../hooks/useTimer";
 type BBscanner = {
   pair: string;
@@ -17,7 +17,6 @@ type BBscanner = {
   maxcandlecloseaftermin: number;
   mincandlecloseaftermin: number;
   lastprice: number;
-
 };
 
 function Bollinger() {
@@ -77,10 +76,10 @@ function Bollinger() {
         }
 
         let mincandlecloseaftermin = 99999999;
-        
+
         for (let i = 0 + 1; i < minindex; i++) {
           if (mincandlecloseaftermin > Number(closepricearray[i]))
-          mincandlecloseaftermin = Number(closepricearray[i]);
+            mincandlecloseaftermin = Number(closepricearray[i]);
         }
 
         //if (x.pair == "ACHUSDT") console.log(x.data);
@@ -94,7 +93,7 @@ function Bollinger() {
           current: closearray[0],
           maxcandlecloseaftermin,
           lastprice: Number(closepricearray[0]),
-          mincandlecloseaftermin
+          mincandlecloseaftermin,
         });
       });
 
@@ -121,8 +120,8 @@ function Bollinger() {
     });
   }
 
-  useEffect(()=>{
-    let temp = [...BBscannerobj]
+  useEffect(() => {
+    let temp = [...BBscannerobj];
     temp = temp.sort((i, j) => {
       if (
         i.percent24 != undefined && j.percent24 != undefined
@@ -135,7 +134,7 @@ function Bollinger() {
     });
 
     SetBBscannerobj(temp);
-  },[bbfilter])
+  }, [bbfilter]);
   useEffect(() => {
     setreload();
     let refreshinterval: number = 0;
@@ -154,11 +153,11 @@ function Bollinger() {
     };
   }, [period]);
 
-  // useEffect(() => console.log(BBscannerobj), [BBscannerobj]);
+  //useEffect(() => console.log(BBscannerobj), [BBscannerobj]);
   function filterBB(item: BBscanner) {
-    if (bbfilter == "Long") {
-      // if (item.pair == "ACHUSDT") {
-      //   console.log(item.pair);
+    if (bbfilter == "Long" && item.max != undefined) {
+      // if (period == "1d") {
+      //   console.log(item);
 
       //   console.log(
       //     item.max.upper - item.max.lower >
@@ -175,10 +174,13 @@ function Bollinger() {
           (item.min.upper - item.min.lower) * 3 &&
         //&& item.max.upper > item.min.upper
         //&& item.max.lower < item.min.lower
-        Number(item.lastprice) < item.min.upper * 1.01 &&
+        Number(item.lastprice) < item.min.upper * 1.02 &&
         Number(item.lastprice) > item.min.middle &&
-        item.minindex < 30 &&
-        item.maxcandlecloseaftermin > item.min.upper
+        //item.minindex < 30 &&
+        item.maxcandlecloseaftermin > item.min.upper &&
+        item.percent24 != undefined
+          ? item.percent24 > 0
+          : false
       )
         return true;
       else return false;
@@ -200,44 +202,55 @@ function Bollinger() {
   }
   return (
     <div>
-      <div style={{display:"flex",justifyContent:"stretch"}}>
-      <div style={{ fontSize: "20px", position: "inherit", color: "black", padding:10, margin:10 }}>
-        {" "}
-        Reload in : {reload}
-      </div>
-      <select
-      style={{ padding:10, margin:10, width:100 }}
-        className="container"
-        onChange={(e) => {
-          //console.log(e.target.value);
+      <div className="header">
+        <div
+          style={{
+            fontSize: "20px",
+            position: "inherit",
+            color: "black",
+            padding: 10,
+            margin: 10,
+          }}
+        >
+          {" "}
+          Reload in : {reload}
+        </div>
+        <select
+          style={{ padding: 10, margin: 10, width: 100 }}
+          className="container"
+          onChange={(e) => {
+            //console.log(e.target.value);
 
-          setperiod(e.target.value.toString());
-        }}
-        defaultValue={"1h"}
-      >
-        <option>1d</option>
-        <option>4h</option>
-        <option>1h</option>
-        <option>15m</option>
-        <option>5m</option>
-      </select>
-      <button
-        style={{
-          width: "100px",
-          height: "50px",
-          backgroundColor: bbfilter == "Long" ? "#50C878" : "#D03D33",
-          border: "0",
-        }}
-        onClick={() => {
-          if (bbfilter == "Long") setbbfilter("Short");
-          else setbbfilter("Long");
-        }}
-      >
-        {bbfilter}
-      </button>
+            setperiod(e.target.value.toString());
+          }}
+          defaultValue={"1h"}
+        >
+          <option>1d</option>
+          <option>4h</option>
+          <option>1h</option>
+          <option>15m</option>
+          <option>5m</option>
+        </select>
+        <button
+          style={{
+            width: "100px",
+            height: "50px",
+            backgroundColor: bbfilter == "Long" ? "#50C878" : "#D03D33",
+            border: "0",
+          }}
+          onClick={() => {
+            if (bbfilter == "Long") setbbfilter("Short");
+            else setbbfilter("Long");
+          }}
+        >
+          {bbfilter}
+        </button>
       </div>
       <div className="container">
-        <table className="responsive-table" style={{border:5, borderColor:"black"}}>
+        <table
+          className="responsive-table"
+          style={{ border: 5, borderColor: "black" }}
+        >
           <thead>
             <tr>
               <th>Pair</th>
@@ -251,7 +264,7 @@ function Bollinger() {
             {BBscannerobj.map((item) => {
               if (filterBB(item))
                 return (
-                  <tr key={item.pair} >
+                  <tr key={item.pair}>
                     <td>{item.pair}</td>
                     <td>{item.percent24}</td>
                     <td>{item.maxindex}</td>

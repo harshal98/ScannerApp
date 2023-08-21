@@ -31,9 +31,11 @@ function App() {
 
   //let funmemo = useCallback(()=>console.log("prop function"),[])
   return (
-    <>
-      {" "}
-      <div className="item" style={{display:"flex",justifyContent:"stretch"}}>
+    <div className="select">
+      <div
+        className="item"
+        style={{ display: "flex", justifyContent: "center" }}
+      >
         <p>Bollinger Bands</p>
         <label className="switch">
           <input
@@ -55,7 +57,7 @@ function App() {
       {/* <button onClick={()=>setreload(prev=>!prev)}>UpdateState {String(reload)}</button> */}
       {/* <MemoizedTestComponent fun={funmemo}></MemoizedTestComponent> */}
       {/* <MemoizedDailyPercent list={[]}></MemoizedDailyPercent > */}
-    </>
+    </div>
   );
 }
 

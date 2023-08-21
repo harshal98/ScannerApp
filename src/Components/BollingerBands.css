@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
 
 html {
     box-sizing: border-box;
@@ -51,7 +51,7 @@ html {
   .responsive-table thead {
     position: absolute;
     clip: rect(1px 1px 1px 1px);
-    /* IE6, IE7 */
+     IE6, IE7 
     padding: 0;
     border: 0;
     height: 1px;
@@ -212,6 +212,35 @@ html {
     }
   }
 
+ */
+.header {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
 
-
- 
+tr,
+td {
+  background-color: lightgreen;
+  border-color: black;
+  text-align: center;
+  padding: 20px;
+  font-size: large;
+}
+table tr {
+  box-shadow: 0 0 4px #000000;
+}
+#root {
+  width: 100%;
+}
+th {
+  background-color: gray;
+  border-color: black;
+  text-align: center;
+  padding: 20px;
+  font-size: large;
+}
