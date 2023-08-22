@@ -159,7 +159,7 @@ function RsiDivergence() {
               item.max2 > item.max1 &&
               item.cpmax1 > item.cpmax2 &&
               item.max2index < 55 &&
-              item.cpmax2 > item.lastprice * 0.995
+              item.cpmax2 * 1.02 > item.lastprice
               //item.max1index > 10 + item.max2index //&&
               //item.max1index < item.max2index + 30
             )
