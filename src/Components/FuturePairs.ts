@@ -1,4 +1,6 @@
 export default [
+  "CYBERUSDT",
+  "RUNEUSDT",
   "SEIUSDT",
   "BLZUSDT",
   "OXTUSDT",
