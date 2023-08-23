@@ -42,7 +42,9 @@ export async function getData(
 }
 
 //Return an array of object for daily percentage in form {pair,percentage}
-export async function get24hr() {
+export async function get24hr(): Promise<
+  { pair: string; priceChangePercent: number }[]
+> {
   return axios
     .get(
       `https://api.binance.com/api/v3/ticker/24hr?symbols=[${FuturePairs.map(

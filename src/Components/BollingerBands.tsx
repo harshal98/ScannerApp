@@ -17,6 +17,7 @@ type BBscanner = {
   maxcandlecloseaftermin: number;
   mincandlecloseaftermin: number;
   lastprice: number;
+  dailyRank?: number;
 };
 
 function Bollinger() {
@@ -25,7 +26,7 @@ function Bollinger() {
   const [bbfilter, setbbfilter] = useState<string>("Long");
   const [BBscannerobj, SetBBscannerobj] = useState<BBscanner[]>([]);
 
-  async function generateBB(response: any) {
+  async function generateBB(response: any[]) {
     getData(4, period, 100).then((data) => {
       let temp: BBscanner[] = [];
       data.forEach((x) => {
@@ -100,9 +101,9 @@ function Bollinger() {
       temp = temp.map((itemp) => {
         let p = response.filter((item24: any) => {
           return item24.pair == itemp.pair;
-        })[0].priceChangePercent;
+        })[0];
 
-        return { ...itemp, percent24: p };
+        return { ...itemp, percent24: p.priceChangePercent, dailyRank: p.rank };
       });
 
       temp = temp.sort((i, j) => {
@@ -135,10 +136,20 @@ function Bollinger() {
 
     SetBBscannerobj(temp);
   }, [bbfilter]);
+
   useEffect(() => {
     setreload();
     let refreshinterval: number = 0;
-    get24hr().then((response: any) => {
+    get24hr().then((response) => {
+      response = response
+        .sort((i, j) => {
+          if (i.priceChangePercent > j.priceChangePercent) return -1;
+          else return 1;
+        })
+        .map((item, index) => {
+          return { ...item, rank: index + 1 };
+        });
+
       generateBB(response);
       refreshinterval = setInterval(() => {
         setreload();
@@ -153,7 +164,7 @@ function Bollinger() {
     };
   }, [period]);
 
-  //useEffect(() => console.log(BBscannerobj), [BBscannerobj]);
+  useEffect(() => console.log(BBscannerobj), [BBscannerobj]);
   function filterBB(item: BBscanner) {
     if (bbfilter == "Long" && item.max != undefined) {
       // if (period == "1d") {
@@ -176,7 +187,7 @@ function Bollinger() {
           item.min.lower &&
         item.max.upper - (item.max.upper - item.max.lower) * 0.15 >
           item.min.upper &&
-        Number(item.lastprice) < item.min.upper * 1.02 &&
+        //Number(item.lastprice) < item.min.upper * 1.02 &&
         Number(item.lastprice) > item.min.middle &&
         item.minindex < 30 &&
         item.maxcandlecloseaftermin > item.min.upper &&
@@ -263,7 +274,7 @@ function Bollinger() {
               <th>Daily%</th>
               <th>MaxIndex</th>
               <th>MinIndex</th>
-              <th>BB%</th>
+              <th>DailyRank</th>
             </tr>
           </thead>
           <tbody>
@@ -276,11 +287,12 @@ function Bollinger() {
                     <td>{item.maxindex}</td>
                     <td>{item.minindex}</td>
                     <td>
-                      {Number(
-                        ((item.max.upper - item.max.lower) /
+                      {
+                        /*(item.max.upper - item.max.lower) /
                           (item.min.upper - item.min.lower)) *
                           100
-                      ).toFixed(0)}
+                      ).toFixed(0)*/ item.dailyRank
+                      }
                     </td>
                     {/* <td>{`${item.lastcandlecloseprice} > ${item.current.middle}`}</td> */}
                   </tr>
