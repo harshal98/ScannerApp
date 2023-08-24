@@ -1,4 +1,6 @@
 export default [
+  "SFPUSDT",
+  "LEVERUSDT",
   "CYBERUSDT",
   "RUNEUSDT",
   "SEIUSDT",

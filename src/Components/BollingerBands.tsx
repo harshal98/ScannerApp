@@ -183,15 +183,16 @@ function Bollinger() {
       if (
         item.max.upper - item.max.lower >
           (item.min.upper - item.min.lower) * 3 &&
-        item.max.upper - (item.max.upper - item.max.lower) * 0.61 <
-          item.min.lower &&
-        item.max.upper - (item.max.upper - item.max.lower) * 0.15 >
-          item.min.upper &&
+        // item.max.upper - (item.max.upper - item.max.lower) * 0.61 <
+        //   item.min.lower &&
+        // item.max.upper - (item.max.upper - item.max.lower) * 0.15 >
+        //   item.min.upper &&
         //Number(item.lastprice) < item.min.upper * 1.02 &&
         Number(item.lastprice) > item.min.middle &&
-        item.minindex < 30 &&
-        item.maxcandlecloseaftermin > item.min.upper &&
-        item.maxindex > item.minindex + 15
+       // item.minindex < 30 &&
+        item.maxcandlecloseaftermin > item.min.middle &&
+        item.maxcandlecloseaftermin < item.min.upper * 1.02
+        
 
         // &&
         // item.percent24 != undefined
