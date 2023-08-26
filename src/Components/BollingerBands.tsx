@@ -45,13 +45,15 @@ function Bollinger() {
         //setdatalist(closearray)
         let max = closearray[0];
         let maxindex = 0;
-        for (let i = 0; i < closearray.length - 1; i++) {
-          if (
-            max.upper - max.lower <
-            closearray[i].upper - closearray[i].lower
-          ) {
-            max = closearray[i];
-            maxindex = i;
+        if (max != undefined) {
+          for (let i = 0; i < closearray.length - 1; i++) {
+            if (
+              max.upper - max.lower <
+              closearray[i].upper - closearray[i].lower
+            ) {
+              max = closearray[i];
+              maxindex = i;
+            }
           }
         }
 
@@ -189,10 +191,9 @@ function Bollinger() {
         //   item.min.upper &&
         //Number(item.lastprice) < item.min.upper * 1.02 &&
         Number(item.lastprice) > item.min.middle &&
-       // item.minindex < 30 &&
+        // item.minindex < 30 &&
         item.maxcandlecloseaftermin > item.min.middle &&
         item.maxcandlecloseaftermin < item.min.upper * 1.02
-        
 
         // &&
         // item.percent24 != undefined
