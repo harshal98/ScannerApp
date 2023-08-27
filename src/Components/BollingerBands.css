@@ -243,4 +243,6 @@ th {
   text-align: center;
   padding: 20px;
   font-size: large;
+  position: sticky;
+  top: 0;
 }

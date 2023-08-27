@@ -2,7 +2,7 @@ import { BollingerBands } from "@debut/indicators";
 import { useEffect, useState } from "react";
 
 import { get24hr, getData } from "./GetData";
-
+import FuturePairs from "./FuturePairs";
 // import "./Volume.css";
 import "./BollingerBands.css";
 import useTimer from "../hooks/useTimer";
@@ -20,14 +20,30 @@ type BBscanner = {
   dailyRank?: number;
 };
 
+type TableDisplay = {
+  pair: string;
+  m5: number;
+  m15: number;
+  h1: number;
+  h4: number;
+  d1: number;
+  daily24percent?: number;
+  dailyrank?: number;
+};
+
 function Bollinger() {
   const [reload, setreload] = useTimer(10);
-  const [period, setperiod] = useState("1h");
-  const [bbfilter, setbbfilter] = useState<string>("Long");
-  const [BBscannerobj, SetBBscannerobj] = useState<BBscanner[]>([]);
+  //const [period, setperiod] = useState("1h");
+  //const [bbfilter, setbbfilter] = useState<string>("Long");
+  const [display, setDisplay] = useState<TableDisplay[]>([]);
+  // const [BBscannerobj, SetBBscannerobj] = useState<BBscanner[]>([]);
+  let timeframes = ["5m", "15m", "1h", "4h", "1d"];
 
-  async function generateBB(response: any[]) {
-    getData(4, period, 100).then((data) => {
+  async function generateBB(
+    response: any[],
+    period: string
+  ): Promise<BBscanner[]> {
+    return getData(4, period, 100).then((data) => {
       let temp: BBscanner[] = [];
       data.forEach((x) => {
         let closearray: { upper: number; middle: number; lower: number }[] = [];
@@ -73,14 +89,14 @@ function Bollinger() {
 
         let maxcandlecloseaftermin = 0;
         let closepricearray = x.data.reverse();
-        for (let i = 0 + 1; i < minindex; i++) {
+        for (let i = 0; i <= minindex; i++) {
           if (maxcandlecloseaftermin < Number(closepricearray[i]))
             maxcandlecloseaftermin = Number(closepricearray[i]);
         }
 
         let mincandlecloseaftermin = 99999999;
 
-        for (let i = 0 + 1; i < minindex; i++) {
+        for (let i = 0 + 1; i <= minindex; i++) {
           if (mincandlecloseaftermin > Number(closepricearray[i]))
             mincandlecloseaftermin = Number(closepricearray[i]);
         }
@@ -114,30 +130,30 @@ function Bollinger() {
             ? i.percent24 > j.percent24
             : false
         )
-          return bbfilter == "Long" ? -1 : 1;
-        else return bbfilter == "Long" ? 1 : -1;
+          return -1; //bbfilter == "Long" ? -1 : 1;
+        else return 1; //bbfilter == "Long" ? 1 : -1;
         return 0;
       });
 
-      SetBBscannerobj(temp);
+      return temp;
     });
   }
 
-  useEffect(() => {
-    let temp = [...BBscannerobj];
-    temp = temp.sort((i, j) => {
-      if (
-        i.percent24 != undefined && j.percent24 != undefined
-          ? i.percent24 > j.percent24
-          : false
-      )
-        return bbfilter == "Long" ? -1 : 1;
-      else return bbfilter == "Long" ? 1 : -1;
-      return 0;
-    });
+  // useEffect(() => {
+  //   let temp = [...BBscannerobj];
+  //   temp = temp.sort((i, j) => {
+  //     if (
+  //       i.percent24 != undefined && j.percent24 != undefined
+  //         ? i.percent24 > j.percent24
+  //         : false
+  //     )
+  //       return bbfilter == "Long" ? -1 : 1;
+  //     else return bbfilter == "Long" ? 1 : -1;
+  //     return 0;
+  //   });
 
-    SetBBscannerobj(temp);
-  }, [bbfilter]);
+  //   SetBBscannerobj(temp);
+  // }, [bbfilter]);
 
   useEffect(() => {
     setreload();
@@ -152,11 +168,63 @@ function Bollinger() {
           return { ...item, rank: index + 1 };
         });
 
-      generateBB(response);
-      refreshinterval = setInterval(() => {
-        setreload();
-        generateBB(response);
-      }, 10000);
+      let temp = [];
+      for (let x of timeframes) {
+        temp.push(generateBB(response, x));
+      }
+      Promise.all(temp).then((res) => {
+        console.log(res);
+        let tempdisplay: TableDisplay[] = [];
+        for (let x of FuturePairs) {
+          let pair = x;
+          let m5 =
+            filterBB(res[0].filter((item) => item.pair == x)[0]) == true
+              ? 1
+              : 0;
+          let m15 =
+            filterBB(res[1].filter((item) => item.pair == x)[0]) == true
+              ? 1
+              : 0;
+          let h1 =
+            filterBB(res[2].filter((item) => item.pair == x)[0]) == true
+              ? 1
+              : 0;
+          let h4 =
+            filterBB(res[3].filter((item) => item.pair == x)[0]) == true
+              ? 1
+              : 0;
+          let d1 =
+            filterBB(res[4].filter((item) => item.pair == x)[0]) == true
+              ? 1
+              : 0;
+
+          tempdisplay.push({
+            pair,
+            m5,
+            m15,
+            h1,
+            h4,
+            d1,
+            daily24percent: res[0].filter((item) => item.pair == x)[0]
+              .percent24,
+            dailyrank: res[0].filter((item) => item.pair == x)[0].dailyRank,
+          });
+        }
+        setDisplay(
+          tempdisplay.sort((i, p) => {
+            if (i.dailyrank != undefined && p.dailyrank != undefined) {
+              if (i.dailyrank > p.dailyrank) return 1;
+              else return -1;
+            }
+            return 0;
+          })
+        );
+      });
+
+      // refreshinterval = setInterval(() => {
+      //   setreload();
+      //   generateBB(response);
+      // }, 10000);
     });
 
     return () => {
@@ -164,11 +232,11 @@ function Bollinger() {
 
       //console.log("const refreshinterval cleared");
     };
-  }, [period]);
+  }, []);
 
-  useEffect(() => console.log(BBscannerobj), [BBscannerobj]);
+  // useEffect(() => console.log(BBscannerobj), [BBscannerobj]);
   function filterBB(item: BBscanner) {
-    if (bbfilter == "Long" && item.max != undefined) {
+    if (/*bbfilter == "Long" &&*/ item.max != undefined) {
       // if (period == "1d") {
       //   console.log(item);
 
@@ -191,9 +259,9 @@ function Bollinger() {
         //   item.min.upper &&
         //Number(item.lastprice) < item.min.upper * 1.02 &&
         Number(item.lastprice) > item.min.middle &&
-        // item.minindex < 30 &&
-        item.maxcandlecloseaftermin > item.min.middle &&
-        item.maxcandlecloseaftermin < item.min.upper * 1.02
+        item.minindex < 25 &&
+        item.maxcandlecloseaftermin > item.min.middle // &&
+        //item.maxcandlecloseaftermin < item.min.upper * 1.02
 
         // &&
         // item.percent24 != undefined
@@ -203,20 +271,21 @@ function Bollinger() {
         return true;
       else return false;
     }
-    if (bbfilter == "Short") {
-      if (
-        item.max.upper - item.max.lower >
-          (item.min.upper - item.min.lower) * 3 &&
-        //&& item.max.upper > item.min.upper
-        //&& item.max.lower < item.min.lower
-        Number(item.lastprice) > item.min.lower * 0.99 &&
-        Number(item.lastprice) < item.min.middle &&
-        item.minindex < 30 &&
-        item.mincandlecloseaftermin < item.min.lower
-      )
-        return true;
-      else return false;
-    }
+    // if (bbfilter == "Short") {
+    //   if (
+    //     item.max.upper - item.max.lower >
+    //       (item.min.upper - item.min.lower) * 3 &&
+    //     //&& item.max.upper > item.min.upper
+    //     //&& item.max.lower < item.min.lower
+    //     Number(item.lastprice) > item.min.lower * 0.99 &&
+    //     Number(item.lastprice) < item.min.middle &&
+    //     item.minindex < 30 &&
+    //     item.mincandlecloseaftermin < item.min.lower
+    //   )
+    //     return true;
+    //   else return false;
+    // }
+    return false;
   }
   return (
     <div>
@@ -233,39 +302,6 @@ function Bollinger() {
           {" "}
           Reload in : {reload}
         </div>
-        <select
-          style={{ padding: 10, margin: 10, width: 100 }}
-          className="container"
-          onChange={(e) => {
-            //console.log(e.target.value);
-
-            setperiod(e.target.value.toString());
-          }}
-          defaultValue={"1h"}
-        >
-          <option>1d</option>
-          <option>4h</option>
-          <option>1h</option>
-          <option>15m</option>
-          <option>5m</option>
-          {/* <option>1m</option> */}
-        </select>
-        <button
-          style={{
-            width: "100px",
-            height: "50px",
-            backgroundColor: bbfilter == "Long" ? "#50C878" : "#D03D33",
-            border: "0",
-          }}
-          onClick={() => {
-            if (bbfilter == "Long") setbbfilter("Short");
-            else setbbfilter("Long");
-          }}
-        >
-          {bbfilter}
-        </button>
-      </div>
-      <div className="container">
         <table
           className="responsive-table"
           style={{ border: 5, borderColor: "black" }}
@@ -273,28 +309,117 @@ function Bollinger() {
           <thead>
             <tr>
               <th>Pair</th>
-              <th>Daily%</th>
-              <th>MaxIndex</th>
-              <th>MinIndex</th>
+              <th
+                onClick={() => {
+                  setDisplay(
+                    [...display].sort((i, j) => {
+                      if (i.m5 > j.m5) return -1;
+                      else return 1;
+                    })
+                  );
+                }}
+              >
+                5min
+              </th>
+              <th
+                onClick={() => {
+                  setDisplay(
+                    [...display].sort((i, j) => {
+                      if (i.m15 > j.m15) return -1;
+                      else return 1;
+                    })
+                  );
+                }}
+              >
+                15min
+              </th>
+              <th
+                onClick={() => {
+                  setDisplay(
+                    [...display].sort((i, j) => {
+                      if (i.h1 > j.h1) return -1;
+                      else return 1;
+                    })
+                  );
+                }}
+              >
+                1hour
+              </th>
+              <th
+                onClick={() => {
+                  setDisplay(
+                    [...display].sort((i, j) => {
+                      if (i.h4 > j.h4) return -1;
+                      else return 1;
+                    })
+                  );
+                }}
+              >
+                4hour
+              </th>
+              <th
+                onClick={() => {
+                  setDisplay(
+                    [...display].sort((i, j) => {
+                      if (i.d1 > j.d1) return -1;
+                      else return 1;
+                    })
+                  );
+                }}
+              >
+                1D
+              </th>
               <th>DailyRank</th>
             </tr>
           </thead>
           <tbody>
-            {BBscannerobj.map((item) => {
-              if (filterBB(item))
+            {display.map((item) => {
+              let i = item.m5 + item.m15 + item.h4 + item.h1 + item.d1;
+              if (i > 1)
                 return (
                   <tr key={item.pair}>
                     <td>{item.pair}</td>
-                    <td>{item.percent24}</td>
-                    <td>{item.maxindex}</td>
-                    <td>{item.minindex}</td>
+                    <td
+                      style={{
+                        backgroundColor: item.m5 == 1 ? "Yellow" : "inherit",
+                      }}
+                    >
+                      {item.m5 == 1 ? "Yes" : item.m5}
+                    </td>
+                    <td
+                      style={{
+                        backgroundColor: item.m15 == 1 ? "Yellow" : "inherit",
+                      }}
+                    >
+                      {item.m15 ? "Yes" : item.m15}
+                    </td>
+                    <td
+                      style={{
+                        backgroundColor: item.h1 == 1 ? "Yellow" : "inherit",
+                      }}
+                    >
+                      {item.h1 ? "Yes" : item.h1}
+                    </td>
+                    <td
+                      style={{
+                        backgroundColor: item.h4 == 1 ? "Yellow" : "inherit",
+                      }}
+                    >
+                      {item.h4 ? "Yes" : item.h4}
+                    </td>
+                    <td
+                      style={{
+                        backgroundColor: item.d1 == 1 ? "Yellow" : "inherit",
+                      }}
+                    >
+                      {item.d1 ? "Yes" : item.d1}
+                    </td>
+                    <td>{item.dailyrank}</td>
                     <td>
-                      {
-                        /*(item.max.upper - item.max.lower) /
+                      {/*(item.max.upper - item.max.lower) /
                           (item.min.upper - item.min.lower)) *
                           100
-                      ).toFixed(0)*/ item.dailyRank
-                      }
+                      ).toFixed(0)*/}
                     </td>
                     {/* <td>{`${item.lastcandlecloseprice} > ${item.current.middle}`}</td> */}
                   </tr>
