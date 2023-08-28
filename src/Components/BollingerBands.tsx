@@ -361,7 +361,7 @@ function Bollinger() {
               >
                 1D
               </th>
-              <th>DailyRank</th>
+              <th>Daily%</th>
             </tr>
           </thead>
           <tbody>
@@ -406,7 +406,7 @@ function Bollinger() {
                     >
                       {item.d1 ? "Yes" : item.d1}
                     </td>
-                    <td>{item.dailyrank}</td>
+                    <td>{item.daily24percent}</td>
                     {/* <td>
                       (item.max.upper - item.max.lower) /
                           (item.min.upper - item.min.lower)) *
