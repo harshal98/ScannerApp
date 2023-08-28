@@ -32,7 +32,7 @@ type TableDisplay = {
 };
 
 function Bollinger() {
-  const [reload, setreload] = useTimer(10);
+  const [reload, setreload] = useTimer(30);
   //const [period, setperiod] = useState("1h");
   //const [bbfilter, setbbfilter] = useState<string>("Long");
   const [display, setDisplay] = useState<TableDisplay[]>([]);
@@ -168,63 +168,12 @@ function Bollinger() {
           return { ...item, rank: index + 1 };
         });
 
-      let temp = [];
-      for (let x of timeframes) {
-        temp.push(generateBB(response, x));
-      }
-      Promise.all(temp).then((res) => {
-        console.log(res);
-        let tempdisplay: TableDisplay[] = [];
-        for (let x of FuturePairs) {
-          let pair = x;
-          let m5 =
-            filterBB(res[0].filter((item) => item.pair == x)[0]) == true
-              ? 1
-              : 0;
-          let m15 =
-            filterBB(res[1].filter((item) => item.pair == x)[0]) == true
-              ? 1
-              : 0;
-          let h1 =
-            filterBB(res[2].filter((item) => item.pair == x)[0]) == true
-              ? 1
-              : 0;
-          let h4 =
-            filterBB(res[3].filter((item) => item.pair == x)[0]) == true
-              ? 1
-              : 0;
-          let d1 =
-            filterBB(res[4].filter((item) => item.pair == x)[0]) == true
-              ? 1
-              : 0;
+      updateDisplayTable(response);
 
-          tempdisplay.push({
-            pair,
-            m5,
-            m15,
-            h1,
-            h4,
-            d1,
-            daily24percent: res[0].filter((item) => item.pair == x)[0]
-              .percent24,
-            dailyrank: res[0].filter((item) => item.pair == x)[0].dailyRank,
-          });
-        }
-        setDisplay(
-          tempdisplay.sort((i, p) => {
-            if (i.dailyrank != undefined && p.dailyrank != undefined) {
-              if (i.dailyrank > p.dailyrank) return 1;
-              else return -1;
-            }
-            return 0;
-          })
-        );
-      });
-
-      // refreshinterval = setInterval(() => {
-      //   setreload();
-      //   generateBB(response);
-      // }, 10000);
+      refreshinterval = setInterval(() => {
+        setreload();
+        updateDisplayTable(response);
+      }, 30000);
     });
 
     return () => {
@@ -234,6 +183,49 @@ function Bollinger() {
     };
   }, []);
 
+  function updateDisplayTable(response: any) {
+    let temp = [];
+    for (let x of timeframes) {
+      temp.push(generateBB(response, x));
+    }
+    Promise.all(temp).then((res) => {
+      console.log(res);
+      let tempdisplay: TableDisplay[] = [];
+      for (let x of FuturePairs) {
+        let pair = x;
+        let m5 =
+          filterBB(res[0].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
+        let m15 =
+          filterBB(res[1].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
+        let h1 =
+          filterBB(res[2].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
+        let h4 =
+          filterBB(res[3].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
+        let d1 =
+          filterBB(res[4].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
+
+        tempdisplay.push({
+          pair,
+          m5,
+          m15,
+          h1,
+          h4,
+          d1,
+          daily24percent: res[0].filter((item) => item.pair == x)[0].percent24,
+          dailyrank: res[0].filter((item) => item.pair == x)[0].dailyRank,
+        });
+      }
+      setDisplay(
+        tempdisplay.sort((i, p) => {
+          if (i.dailyrank != undefined && p.dailyrank != undefined) {
+            if (i.dailyrank > p.dailyrank) return 1;
+            else return -1;
+          }
+          return 0;
+        })
+      );
+    });
+  }
   // useEffect(() => console.log(BBscannerobj), [BBscannerobj]);
   function filterBB(item: BBscanner) {
     if (/*bbfilter == "Long" &&*/ item.max != undefined) {
@@ -293,7 +285,7 @@ function Bollinger() {
         <div
           style={{
             fontSize: "20px",
-            position: "inherit",
+
             color: "black",
             padding: 10,
             margin: 10,
@@ -415,12 +407,12 @@ function Bollinger() {
                       {item.d1 ? "Yes" : item.d1}
                     </td>
                     <td>{item.dailyrank}</td>
-                    <td>
-                      {/*(item.max.upper - item.max.lower) /
+                    {/* <td>
+                      (item.max.upper - item.max.lower) /
                           (item.min.upper - item.min.lower)) *
                           100
-                      ).toFixed(0)*/}
-                    </td>
+                      ).toFixed(0)
+                    </td> */}
                     {/* <td>{`${item.lastcandlecloseprice} > ${item.current.middle}`}</td> */}
                   </tr>
                 );
