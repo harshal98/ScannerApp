@@ -1,8 +1,8 @@
 //import Bollinger from "./Components/BollingerBands"
 //import Macd from "./Components/Macd"
-import { useState } from "react";
+//import { useState } from "react";
 import Bollinger from "./Components/BollingerBands";
-import RsiDivergence from "./Components/RsiDivergence";
+//import RsiDivergence from "./Components/RsiDivergence";
 import "./App.css";
 // import DailyPercent, { MemoizedDailyPercent } from "./Components/DailyPercent"
 // // import DailyPercent, { MemoizedDailyPercent } from "./Components/DailyPercent"
@@ -13,7 +13,7 @@ import "./App.css";
 // import TestComponent from "./Components/testComponent"
 
 function App() {
-  const [indicator, setIndicator] = useState("Bollinger Bands");
+  //const [indicator, setIndicator] = useState("Bollinger Bands");
 
   //  const [reload,setreload]=useState(false)
 
@@ -32,7 +32,8 @@ function App() {
   //let funmemo = useCallback(()=>console.log("prop function"),[])
   return (
     <div className="select">
-      <div
+      <Bollinger></Bollinger>
+      {/* <div
         className="item"
         style={{ display: "flex", justifyContent: "center" }}
       >
@@ -53,7 +54,7 @@ function App() {
         <p>RSI Divergence</p>
       </div>
       {indicator == "Bollinger Bands" ? <Bollinger></Bollinger> : null}
-      {indicator == "RSI Divergence" ? <RsiDivergence></RsiDivergence> : null}
+      {indicator == "RSI Divergence" ? <RsiDivergence></RsiDivergence> : null} */}
       {/* <button onClick={()=>setreload(prev=>!prev)}>UpdateState {String(reload)}</button> */}
       {/* <MemoizedTestComponent fun={funmemo}></MemoizedTestComponent> */}
       {/* <MemoizedDailyPercent list={[]}></MemoizedDailyPercent > */}

@@ -406,7 +406,31 @@ function Bollinger() {
                     >
                       {item.d1 ? "Yes" : item.d1}
                     </td>
-                    <td>{item.dailyrank + " --- " + item.daily24percent}</td>
+                    <td>
+                      {
+                        <div
+                          style={{ display: "flex", justifyContent: "center" }}
+                        >
+                          <div
+                            style={{
+                              border: "2px groove blue",
+                              marginRight: "50px",
+                              padding: "10px",
+                            }}
+                          >
+                            {item.dailyrank}
+                          </div>
+                          <div
+                            style={{
+                              border: "2px groove blue",
+                              padding: "10px",
+                            }}
+                          >
+                            {item.daily24percent}
+                          </div>
+                        </div>
+                      }
+                    </td>
                     {/* <td>
                       (item.max.upper - item.max.lower) /
                           (item.min.upper - item.min.lower)) *
