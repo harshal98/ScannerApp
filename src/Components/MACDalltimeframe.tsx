@@ -198,10 +198,10 @@ function MACDalltimeframe() {
   function filterMacd(item: MACDScanner) {
     if (item.macdCurrent) {
       if (
-        // item.macdCurrent.macd > 0 &&
-        // item.macdCurrent.signal > 0 &&
-        item.macdCurrent.macd > item.macdCurrent.signal &&
-        item.macdCurrent.macd < item.macdCurrent.signal * 1.02
+        item.macdCurrent.macd > 0 &&
+        item.macdCurrent.signal > 0 &&
+        item.macdCurrent.macd > item.macdCurrent.signal /*&&
+        item.macdCurrent.macd < item.macdCurrent.signal * 1.02*/
       )
         return true;
     } else return false;
