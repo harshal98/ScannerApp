@@ -1,7 +1,7 @@
 //import Bollinger from "./Components/BollingerBands"
 //import Macd from "./Components/Macd"
 //import { useState } from "react";
-import Bollinger from "./Components/BollingerBands";
+import MACDalltimeframe from "./Components/MACDalltimeframe";
 //import RsiDivergence from "./Components/RsiDivergence";
 import "./App.css";
 // import DailyPercent, { MemoizedDailyPercent } from "./Components/DailyPercent"
@@ -32,7 +32,7 @@ function App() {
   //let funmemo = useCallback(()=>console.log("prop function"),[])
   return (
     <div className="select">
-      <Bollinger></Bollinger>
+      <MACDalltimeframe></MACDalltimeframe>
       {/* <div
         className="item"
         style={{ display: "flex", justifyContent: "center" }}

@@ -1,4 +1,4 @@
-import { BollingerBands } from "@debut/indicators";
+import { MACD } from "@debut/indicators";
 import { useEffect, useState } from "react";
 
 import { get24hr, getData } from "./GetData";
@@ -6,16 +6,17 @@ import FuturePairs from "./FuturePairs";
 // import "./Volume.css";
 import "./BollingerBands.css";
 import useTimer from "../hooks/useTimer";
-type BBscanner = {
+type MACDScanner = {
   pair: string;
-  max: { upper: number; middle: number; lower: number };
-  maxindex: number;
-  min: { upper: number; middle: number; lower: number };
-  minindex: number;
+  macdCurrent: {
+    macd: number;
+    emaFast: number;
+    emaSlow: number;
+    signal: number;
+    histogram: number;
+  };
+
   percent24?: number;
-  current: { upper: number; middle: number; lower: number };
-  maxcandlecloseaftermin: number;
-  mincandlecloseaftermin: number;
   lastprice: number;
   dailyRank?: number;
 };
@@ -31,88 +32,43 @@ type TableDisplay = {
   dailyrank?: number;
 };
 
-function Bollinger() {
+function MACDalltimeframe() {
   const [reload, setreload] = useTimer(30);
   //const [period, setperiod] = useState("1h");
   //const [bbfilter, setbbfilter] = useState<string>("Long");
   const [display, setDisplay] = useState<TableDisplay[]>([]);
-  // const [BBscannerobj, SetBBscannerobj] = useState<BBscanner[]>([]);
+  // const [MACDScannerobj, SetMACDScannerobj] = useState<MACDScanner[]>([]);
   let timeframes = ["5m", "15m", "1h", "4h", "1d"];
 
-  async function generateBB(
+  async function generateMACD(
     response: any[],
     period: string
-  ): Promise<BBscanner[]> {
-    return getData(4, period, 100).then((data) => {
-      let temp: BBscanner[] = [];
+  ): Promise<MACDScanner[]> {
+    return getData(4, period, 200).then((data) => {
+      let temp: MACDScanner[] = [];
       data.forEach((x) => {
-        let closearray: { upper: number; middle: number; lower: number }[] = [];
+        let closearray: {
+          macd: number;
+          emaFast: number;
+          emaSlow: number;
+          signal: number;
+          histogram: number;
+        }[] = [];
 
-        let bb = new BollingerBands(20, 2);
+        let macd = new MACD(12, 26, 9);
 
         closearray = x.data
-          .map((close) => bb.nextValue(Number(close)))
+          .map((close) => macd.nextValue(Number(close)))
           .reverse();
-        closearray = closearray.slice(0, closearray.length - 19);
-        //closearray = closearray.map((item)=> item)
+
+        closearray = closearray.slice(0, closearray.length - 25);
 
         //if (x.pair == "RNDRUSDT") console.log(`${x.pair}`,closearray);
 
-        //setdatalist(closearray)
-        let max = closearray[0];
-        let maxindex = 0;
-        if (max != undefined) {
-          for (let i = 0; i < closearray.length - 1; i++) {
-            if (
-              max.upper - max.lower <
-              closearray[i].upper - closearray[i].lower
-            ) {
-              max = closearray[i];
-              maxindex = i;
-            }
-          }
-        }
-
-        //if (x.pair == "RNDRUSDT") console.log(`${x.pair} ==> max`,max,maxindex);
-
-        let min = closearray[maxindex];
-        let minindex = maxindex;
-        for (let i = minindex - 1; i >= 0; i--) {
-          if (
-            min.upper - min.lower >
-            closearray[i].upper - closearray[i].lower
-          ) {
-            min = closearray[i];
-            minindex = i;
-          }
-        }
-
-        let maxcandlecloseaftermin = 0;
-        let closepricearray = x.data.reverse();
-        for (let i = 0; i <= minindex; i++) {
-          if (maxcandlecloseaftermin < Number(closepricearray[i]))
-            maxcandlecloseaftermin = Number(closepricearray[i]);
-        }
-
-        let mincandlecloseaftermin = 99999999;
-
-        for (let i = 0 + 1; i <= minindex; i++) {
-          if (mincandlecloseaftermin > Number(closepricearray[i]))
-            mincandlecloseaftermin = Number(closepricearray[i]);
-        }
-
-        //if (x.pair == "ACHUSDT") console.log(x.data);
-
         temp.push({
           pair: x.pair,
-          min: min,
-          max: max,
-          maxindex: maxindex,
-          minindex: minindex,
-          current: closearray[0],
-          maxcandlecloseaftermin,
-          lastprice: Number(closepricearray[0]),
-          mincandlecloseaftermin,
+          macdCurrent: closearray[0],
+          lastprice: Number(x.data[x.data.length - 1]),
         });
       });
 
@@ -140,7 +96,7 @@ function Bollinger() {
   }
 
   // useEffect(() => {
-  //   let temp = [...BBscannerobj];
+  //   let temp = [...MACDScannerobj];
   //   temp = temp.sort((i, j) => {
   //     if (
   //       i.percent24 != undefined && j.percent24 != undefined
@@ -152,7 +108,7 @@ function Bollinger() {
   //     return 0;
   //   });
 
-  //   SetBBscannerobj(temp);
+  //   SetMACDScannerobj(temp);
   // }, [bbfilter]);
 
   useEffect(() => {
@@ -186,7 +142,7 @@ function Bollinger() {
   function updateDisplayTable(response: any) {
     let temp = [];
     for (let x of timeframes) {
-      temp.push(generateBB(response, x));
+      temp.push(generateMACD(response, x));
     }
     Promise.all(temp).then((res) => {
       console.log(res);
@@ -194,15 +150,25 @@ function Bollinger() {
       for (let x of FuturePairs) {
         let pair = x;
         let m5 =
-          filterBB(res[0].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
+          filterMacd(res[0].filter((item) => item.pair == x)[0]) == true
+            ? 1
+            : 0;
         let m15 =
-          filterBB(res[1].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
+          filterMacd(res[1].filter((item) => item.pair == x)[0]) == true
+            ? 1
+            : 0;
         let h1 =
-          filterBB(res[2].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
+          filterMacd(res[2].filter((item) => item.pair == x)[0]) == true
+            ? 1
+            : 0;
         let h4 =
-          filterBB(res[3].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
+          filterMacd(res[3].filter((item) => item.pair == x)[0]) == true
+            ? 1
+            : 0;
         let d1 =
-          filterBB(res[4].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
+          filterMacd(res[4].filter((item) => item.pair == x)[0]) == true
+            ? 1
+            : 0;
 
         tempdisplay.push({
           pair,
@@ -215,6 +181,8 @@ function Bollinger() {
           dailyrank: res[0].filter((item) => item.pair == x)[0].dailyRank,
         });
       }
+      console.log(tempdisplay);
+
       setDisplay(
         tempdisplay.sort((i, p) => {
           if (i.dailyrank != undefined && p.dailyrank != undefined) {
@@ -226,43 +194,18 @@ function Bollinger() {
       );
     });
   }
-  // useEffect(() => console.log(BBscannerobj), [BBscannerobj]);
-  function filterBB(item: BBscanner) {
-    if (/*bbfilter == "Long" &&*/ item.max != undefined) {
-      // if (period == "1d") {
-      //   console.log(item);
-
-      //   console.log(
-      //     item.max.upper - item.max.lower >
-      //       (item.min.upper - item.min.lower) * 3
-      //   );
-      //   console.log(Number(item.lastprice) < item.min.upper * 1.01);
-      //   console.log(Number(item.lastprice) > item.min.middle, "???");
-      //   console.log(item.minindex < 30);
-      //   console.log(item.maxcandlecloseaftermin > item.min.upper);
-      // }
-
+  // useEffect(() => console.log(MACDScannerobj), [MACDScannerobj]);
+  function filterMacd(item: MACDScanner) {
+    if (item.macdCurrent) {
       if (
-        item.max.upper - item.max.lower >
-          (item.min.upper - item.min.lower) * 3 &&
-        // item.max.upper - (item.max.upper - item.max.lower) * 0.61 <
-        //   item.min.lower &&
-        // item.max.upper - (item.max.upper - item.max.lower) * 0.15 >
-        //   item.min.upper &&
-        //Number(item.lastprice) < item.min.upper * 1.02 &&
-        Number(item.lastprice) > item.min.middle &&
-        item.minindex < 25 &&
-        item.maxcandlecloseaftermin > item.min.middle // &&
-        //item.maxcandlecloseaftermin < item.min.upper * 1.02
-
-        // &&
-        // item.percent24 != undefined
-        //   ? item.percent24 > 0
-        //   : false
+        // item.macdCurrent.macd > 0 &&
+        // item.macdCurrent.signal > 0 &&
+        item.macdCurrent.macd > item.macdCurrent.signal &&
+        item.macdCurrent.macd < item.macdCurrent.signal * 1.02
       )
         return true;
-      else return false;
-    }
+    } else return false;
+
     // if (bbfilter == "Short") {
     //   if (
     //     item.max.upper - item.max.lower >
@@ -277,8 +220,9 @@ function Bollinger() {
     //     return true;
     //   else return false;
     // }
-    return false;
+    // return false;
   }
+
   return (
     <div>
       <div className="header">
@@ -367,7 +311,7 @@ function Bollinger() {
           <tbody>
             {display.map((item) => {
               let i = item.m5 + item.m15 + item.h4 + item.h1 + item.d1;
-              if (i > 1)
+              if (i > 0)
                 return (
                   <tr key={item.pair}>
                     <td>{item.pair}</td>
@@ -448,4 +392,4 @@ function Bollinger() {
   );
 }
 
-export default Bollinger;
+export default MACDalltimeframe;
