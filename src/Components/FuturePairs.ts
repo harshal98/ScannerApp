@@ -4,7 +4,6 @@ export default [
   "JOEUSDT",
   "IDEXUSDT",
   "SNXUSDT",
-  "BLURUSDT",
   "AMBUSDT",
   "TRBUSDT",
   "API3USDT",
