@@ -70,13 +70,14 @@ function CurrentStatus() {
 
       let high = 0;
 
-      item.data.forEach((item) => {
+      item.data.slice(0, p + 1).forEach((item) => {
         if (high < item.h) high = Number(item.h);
       });
+      //console.log(item.pair, high, item.data);
 
       let low = 99999999999;
 
-      item.data.forEach((item) => {
+      item.data.slice(0, p + 1).forEach((item) => {
         if (low > item.l) low = Number(item.l);
       });
 
@@ -93,7 +94,7 @@ function CurrentStatus() {
         pair: item.pair,
         pchange,
         high: String(((high / item.data[p].c) * 100 - 100).toFixed(2)),
-        low: low.toFixed(8),
+        low: String(((low / item.data[p].c) * 100 - 100).toFixed(2)),
         vchange: Number(((v0 / v1) * 100).toFixed(2)),
       };
     });
@@ -182,6 +183,7 @@ function CurrentStatus() {
                 id="demo-simple-select"
                 label="Interval"
                 onChange={handlechange}
+                defaultValue={undefined}
               >
                 <MenuItem value={"1d"}>1d</MenuItem>
                 <MenuItem value={"4h"}>4h</MenuItem>
@@ -233,11 +235,11 @@ function CurrentStatus() {
           <TableBody>
             {changeinpercent.map((item) => {
               return (
-                <TableRow>
+                <TableRow key={item.pair}>
                   <TableCell align="right">{item.pair}</TableCell>
                   <TableCell align="right">{item.pchange} %</TableCell>
-                  <TableCell align="right">{item.high}</TableCell>
-                  <TableCell align="right">{item.low}</TableCell>
+                  <TableCell align="right">{item.high} %</TableCell>
+                  <TableCell align="right">{item.low} %</TableCell>
 
                   <TableCell align="right">{item.vchange} </TableCell>
                 </TableRow>
