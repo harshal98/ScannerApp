@@ -20,7 +20,6 @@ import Paper from "@mui/material/Paper";
 
 function CurrentStatus() {
   const data = useKlineData();
-  console.log(data);
 
   const weeklydata = useKlineData("1h");
   const [sort, setsort] = useState<{ sortby: string; asc: boolean }>({
@@ -93,7 +92,7 @@ function CurrentStatus() {
       return {
         pair: item.pair,
         pchange,
-        high: high.toFixed(8),
+        high: String(((high / item.data[p].c) * 100 - 100).toFixed(2)),
         low: low.toFixed(8),
         vchange: Number(((v0 / v1) * 100).toFixed(2)),
       };
@@ -131,7 +130,6 @@ function CurrentStatus() {
   }
   //UseEffect for daily percentagechane
   useEffect(() => {
-    console.log("data changed");
     if (data.length != 0 && weekly == false) {
       setchangeinpercent(generateChange(data));
     } else {
@@ -142,7 +140,6 @@ function CurrentStatus() {
   //UseEffect for Weekly percentagechane
   useEffect(() => {
     if (weekly != false) {
-      console.log("data changed");
       if (weeklydata.length != 0) {
         setchangeinpercent(generateChange(weeklydata, weekly));
       } else {
@@ -183,7 +180,6 @@ function CurrentStatus() {
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={period}
                 label="Interval"
                 onChange={handlechange}
               >
@@ -239,7 +235,7 @@ function CurrentStatus() {
               return (
                 <TableRow>
                   <TableCell align="right">{item.pair}</TableCell>
-                  <TableCell align="right">{item.pchange}</TableCell>
+                  <TableCell align="right">{item.pchange} %</TableCell>
                   <TableCell align="right">{item.high}</TableCell>
                   <TableCell align="right">{item.low}</TableCell>
 
