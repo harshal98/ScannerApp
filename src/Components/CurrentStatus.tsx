@@ -20,7 +20,16 @@ import Paper from "@mui/material/Paper";
 
 function CurrentStatus() {
   const [data, timer] = useKlineData();
-  const [weeklydata] = useKlineData("1h");
+  let weeklydata: {
+    pair: string;
+    data: {
+      o: number;
+      h: number;
+      l: number;
+      c: number;
+      v: number;
+    }[];
+  }[] = [];
   const [sort, setsort] = useState<{ sortby: string; asc: boolean }>({
     sortby: "price",
     asc: true,
@@ -36,7 +45,9 @@ function CurrentStatus() {
     }[]
   >([]);
   const [weekly, setweekly] = useState(false);
-
+  if (weekly) {
+    [weeklydata] = useKlineData("1h");
+  }
   function generateChange(
     data: {
       pair: string;

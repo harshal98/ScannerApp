@@ -1,11 +1,11 @@
 //import Bollinger from "./Components/BollingerBands"
 //import Macd from "./Components/Macd"
-import { useState } from "react";
-import Bollinger from "./Components/BollingerBands";
-import RsiDivergence from "./Components/RsiDivergence";
+//import { useState } from "react";
+//import Bollinger from "./Components/BollingerBands";
+//import RsiDivergence from "./Components/RsiDivergence";
 //import "./App.css";
 import CurrentStatus from "./Components/CurrentStatus";
-import { Box, Tab, Tabs } from "@mui/material";
+import { Box, Tab } from "@mui/material";
 // import DailyPercent, { MemoizedDailyPercent } from "./Components/DailyPercent"
 // // import DailyPercent, { MemoizedDailyPercent } from "./Components/DailyPercent"
 // import FuturePairs from "./Components/FuturePairs"
@@ -33,13 +33,13 @@ function App() {
 
   //let funmemo = useCallback(()=>console.log("prop function"),[])
 
-  const [value, setValue] = useState(0);
+  //const [value, setValue] = useState(0);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log(event);
+  // const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  //   console.log(event);
 
-    setValue(newValue);
-  };
+  //   setValue(newValue);
+  // };
 
   {
     /* return (
@@ -103,24 +103,24 @@ function App() {
     </Box>
   );
 }
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+// interface TabPanelProps {
+//   children?: React.ReactNode;
+//   index: number;
+//   value: number;
+// }
+// function CustomTabPanel(props: TabPanelProps) {
+//   const { children, value, index, ...other } = props;
 
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
+//   return (
+//     <div
+//       role="tabpanel"
+//       hidden={value !== index}
+//       id={`simple-tabpanel-${index}`}
+//       aria-labelledby={`simple-tab-${index}`}
+//       {...other}
+//     >
+//       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+//     </div>
+//   );
+// }
 export default App;
