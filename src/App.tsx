@@ -79,25 +79,27 @@ function App() {
   return (
     <Box sx={{ width: "100%" }}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs
+        <Tab label="Percentage Change" />
+        {/* <Tabs
           value={value}
           onChange={handleChange}
           aria-label="basic tabs example"
         >
           <Tab label="BollingerBands" />
           <Tab label="Rsi Divergence" />
-          <Tab label="Percentage Change" />
-        </Tabs>
+         
+        </Tabs> */}
       </Box>
-      <CustomTabPanel value={value} index={0}>
+      <CurrentStatus />
+      {/* <CustomTabPanel value={value} index={0}>
         <Bollinger />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
         <RsiDivergence />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        <CurrentStatus />
-      </CustomTabPanel>
+        
+      </CustomTabPanel> */}
     </Box>
   );
 }

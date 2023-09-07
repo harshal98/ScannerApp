@@ -19,9 +19,8 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
 function CurrentStatus() {
-  const data = useKlineData();
-
-  const weeklydata = useKlineData("1h");
+  const [data, timer] = useKlineData();
+  const [weeklydata] = useKlineData("1h");
   const [sort, setsort] = useState<{ sortby: string; asc: boolean }>({
     sortby: "price",
     asc: true,
@@ -206,7 +205,7 @@ function CurrentStatus() {
           Weekly Status
         </Button>
       </Stack>
-
+      <p>{timer}</p>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
