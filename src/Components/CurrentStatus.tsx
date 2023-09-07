@@ -109,44 +109,90 @@ function CurrentStatus() {
       };
     });
 
+    return temparray;
+  }
+  function sortData(
+    unsorted: {
+      pair: string;
+      pchange: number;
+      vchange: number;
+      high: string;
+      low: string;
+    }[]
+  ) {
+    let sorted: {
+      pair: string;
+      pchange: number;
+      vchange: number;
+      high: string;
+      low: string;
+    }[] = [];
     if (sort.sortby == "price") {
       if (sort.asc == true) {
-        temparray = temparray.sort((i, j) => {
+        sorted = unsorted.sort((i, j) => {
           if (i.pchange > j.pchange) return -1;
           else return 1;
         });
       } else {
-        temparray = temparray.sort((i, j) => {
+        sorted = unsorted.sort((i, j) => {
           if (i.pchange < j.pchange) return -1;
           else return 1;
         });
       }
     }
 
-    if (sort.sortby == "volumne") {
+    if (sort.sortby == "volume") {
       if (sort.asc == true) {
-        temparray = temparray.sort((i, j) => {
+        sorted = unsorted.sort((i, j) => {
           if (i.vchange > j.vchange) return -1;
           else return 1;
         });
       } else {
-        temparray = temparray.sort((i, j) => {
+        sorted = unsorted.sort((i, j) => {
           if (i.vchange < j.vchange) return -1;
           else return 1;
         });
       }
     }
-
-    return temparray;
+    if (sort.sortby == "high") {
+      if (sort.asc == true) {
+        sorted = unsorted.sort((i, j) => {
+          if (i.high > j.high) return -1;
+          else return 1;
+        });
+      } else {
+        sorted = unsorted.sort((i, j) => {
+          if (i.high < j.high) return -1;
+          else return 1;
+        });
+      }
+    }
+    if (sort.sortby == "low") {
+      if (sort.asc == true) {
+        sorted = unsorted.sort((i, j) => {
+          if (i.low > j.low) return -1;
+          else return 1;
+        });
+      } else {
+        sorted = unsorted.sort((i, j) => {
+          if (i.low < j.low) return -1;
+          else return 1;
+        });
+      }
+    }
+    return sorted;
   }
+  useEffect(() => {
+    setchangeinpercent(sortData(changeinpercent));
+  }, [sort]);
   //UseEffect for daily percentagechane
   useEffect(() => {
     if (data.length != 0 && weekly == false) {
-      setchangeinpercent(generateChange(data));
+      setchangeinpercent(sortData(generateChange(data)));
     } else {
       console.log("data.lenth is zero");
     }
-  }, [data, period, sort, weekly]);
+  }, [data, period, weekly]);
 
   //UseEffect for Weekly percentagechane
   useEffect(() => {
@@ -157,7 +203,7 @@ function CurrentStatus() {
         console.log("data.lenth is zero");
       }
     }
-  }, [weeklydata, weekly, sort]);
+  }, [weeklydata, weekly]);
 
   const handlechange = (e: SelectChangeEvent<number>) => {
     //console.log(e.target.value);
@@ -193,7 +239,7 @@ function CurrentStatus() {
                 id="demo-simple-select"
                 label="Interval"
                 onChange={handlechange}
-                defaultValue={undefined}
+                defaultValue={0}
               >
                 <MenuItem value={"1d"}>1d</MenuItem>
                 <MenuItem value={"4h"}>4h</MenuItem>
@@ -204,13 +250,6 @@ function CurrentStatus() {
             </FormControl>
           </Box>
         )}
-
-        <Button
-          variant={"contained"}
-          onClick={() => setsort({ ...sort, asc: !sort.asc })}
-        >
-          Sort Gainers
-        </Button>
 
         <Button variant={"contained"} onClick={() => setweekly(!weekly)}>
           Weekly Status
@@ -225,17 +264,31 @@ function CurrentStatus() {
               <TableCell
                 align="right"
                 onClick={() => {
-                  setsort({ ...sort, asc: !sort.asc });
+                  setsort({ sortby: "price", asc: !sort.asc });
                 }}
               >
                 <Button variant={"contained"}>PriceChange</Button>
               </TableCell>
-              <TableCell align="right">High</TableCell>
-              <TableCell align="right">Low</TableCell>
               <TableCell
                 align="right"
                 onClick={() => {
-                  setsort({ ...sort, asc: !sort.asc });
+                  setsort({ sortby: "high", asc: !sort.asc });
+                }}
+              >
+                <Button variant={"contained"}>High</Button>
+              </TableCell>
+              <TableCell
+                align="right"
+                onClick={() => {
+                  setsort({ sortby: "low", asc: !sort.asc });
+                }}
+              >
+                <Button variant={"contained"}>Low</Button>
+              </TableCell>
+              <TableCell
+                align="right"
+                onClick={() => {
+                  setsort({ sortby: "volume", asc: !sort.asc });
                 }}
               >
                 <Button variant={"contained"}>VolumneChange</Button>
