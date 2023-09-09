@@ -40,8 +40,8 @@ function CurrentStatus() {
       pair: string;
       pchange: number;
       vchange: number;
-      high: string;
-      low: string;
+      high: number;
+      low: number;
     }[]
   >([]);
   const [weekly, setweekly] = useState(false);
@@ -65,8 +65,8 @@ function CurrentStatus() {
       pair: string;
       pchange: number;
       vchange: number;
-      high: string;
-      low: string;
+      high: number;
+      low: number;
     }[] = [];
 
     let p = period;
@@ -75,7 +75,7 @@ function CurrentStatus() {
 
     temparray = data.map((item) => {
       let pchange = Number(
-        ((item.data[0].c / item.data[p].c) * 100 - 100).toFixed(2)
+        ((item.data[0].c / item.data[p].c) * 100 - 100).toFixed(1)
       );
 
       let high = 0;
@@ -103,8 +103,8 @@ function CurrentStatus() {
       return {
         pair: item.pair,
         pchange,
-        high: String(((high / item.data[p].c) * 100 - 100).toFixed(2)),
-        low: String(((low / item.data[p].c) * 100 - 100).toFixed(2)),
+        high: Number(((high / item.data[p].c) * 100 - 100).toFixed(1)),
+        low: Number(((low / item.data[p].c) * 100 - 100).toFixed(1)),
         vchange: Number(((v0 / v1) * 100).toFixed(2)),
       };
     });
@@ -116,16 +116,16 @@ function CurrentStatus() {
       pair: string;
       pchange: number;
       vchange: number;
-      high: string;
-      low: string;
+      high: number;
+      low: number;
     }[]
   ) {
     let sorted: {
       pair: string;
       pchange: number;
       vchange: number;
-      high: string;
-      low: string;
+      high: number;
+      low: number;
     }[] = [];
     if (sort.sortby == "price") {
       if (sort.asc == true) {
@@ -224,6 +224,12 @@ function CurrentStatus() {
       case "5m":
         setperiod(1);
         break;
+      case "8h":
+        setperiod(159);
+        break;
+      case "12h":
+        setperiod(241);
+        break;
     }
   };
 
@@ -242,6 +248,8 @@ function CurrentStatus() {
                 defaultValue={0}
               >
                 <MenuItem value={"1d"}>1d</MenuItem>
+                <MenuItem value={"12h"}>12h</MenuItem>
+                <MenuItem value={"8h"}>8h</MenuItem>
                 <MenuItem value={"4h"}>4h</MenuItem>
                 <MenuItem value={"1h"}>1h</MenuItem>
                 <MenuItem value={"15m"}>15m</MenuItem>
