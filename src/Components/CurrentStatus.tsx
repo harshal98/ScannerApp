@@ -17,6 +17,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import { get24hr } from "./GetData";
 
 function CurrentStatus() {
   const [data, timer] = useKlineData();
@@ -42,6 +43,7 @@ function CurrentStatus() {
       vchange: number;
       high: number;
       low: number;
+      dailypercent?: number;
     }[]
   >([]);
   const [weekly, setweekly] = useState(false);
@@ -67,49 +69,56 @@ function CurrentStatus() {
       vchange: number;
       high: number;
       low: number;
+      dailypercent?: number;
     }[] = [];
 
     let p = period;
 
     if (weekly == true) p = 167;
+    get24hr().then((dailydata) => {
+      console.log(data);
 
-    temparray = data.map((item) => {
-      let pchange = Number(
-        ((item.data[0].c / item.data[p].c) * 100 - 100).toFixed(1)
-      );
+      temparray = data.map((item) => {
+        let pchange = Number(
+          ((item.data[0].c / item.data[p].c) * 100 - 100).toFixed(1)
+        );
 
-      let high = 0;
+        let high = 0;
 
-      item.data.slice(0, p + 1).forEach((item) => {
-        if (high < item.h) high = Number(item.h);
+        item.data.slice(0, p + 1).forEach((item) => {
+          if (high < item.h) high = Number(item.h);
+        });
+        //console.log(item.pair, high, item.data);
+
+        let low = 99999999999;
+
+        item.data.slice(0, p + 1).forEach((item) => {
+          if (low > item.l) low = Number(item.l);
+        });
+
+        let v0 = 0;
+        item.data.slice(0, p + 1).forEach((item) => {
+          v0 = v0 + Number(item.v);
+        });
+        let v1 = 0;
+        item.data.slice(p + 1, p + 1 + p + 1).forEach((item) => {
+          v1 = v1 + Number(item.v);
+        });
+
+        return {
+          pair: item.pair,
+          pchange,
+          high: Number(((high / item.data[p].c) * 100 - 100).toFixed(1)),
+          low: Number(((low / item.data[p].c) * 100 - 100).toFixed(1)),
+          vchange: Number(((v0 / v1) * 100).toFixed(2)),
+          dailypercent: dailydata.filter(
+            (item24) => item24.pair == item.pair
+          )[0].priceChangePercent,
+        };
       });
-      //console.log(item.pair, high, item.data);
-
-      let low = 99999999999;
-
-      item.data.slice(0, p + 1).forEach((item) => {
-        if (low > item.l) low = Number(item.l);
-      });
-
-      let v0 = 0;
-      item.data.slice(0, p + 1).forEach((item) => {
-        v0 = v0 + Number(item.v);
-      });
-      let v1 = 0;
-      item.data.slice(p + 1, p + 1 + p + 1).forEach((item) => {
-        v1 = v1 + Number(item.v);
-      });
-
-      return {
-        pair: item.pair,
-        pchange,
-        high: Number(((high / item.data[p].c) * 100 - 100).toFixed(1)),
-        low: Number(((low / item.data[p].c) * 100 - 100).toFixed(1)),
-        vchange: Number(((v0 / v1) * 100).toFixed(2)),
-      };
+      console.log(temparray);
+      setchangeinpercent(sortData(temparray));
     });
-
-    return temparray;
   }
   function sortData(
     unsorted: {
@@ -118,6 +127,7 @@ function CurrentStatus() {
       vchange: number;
       high: number;
       low: number;
+      dailypercent?: number;
     }[]
   ) {
     let sorted: {
@@ -188,22 +198,22 @@ function CurrentStatus() {
   //UseEffect for daily percentagechane
   useEffect(() => {
     if (data.length != 0 && weekly == false) {
-      setchangeinpercent(sortData(generateChange(data)));
+      generateChange(data);
     } else {
       console.log("data.lenth is zero");
     }
   }, [data, period, weekly]);
 
   //UseEffect for Weekly percentagechane
-  useEffect(() => {
-    if (weekly != false) {
-      if (weeklydata.length != 0) {
-        setchangeinpercent(generateChange(weeklydata, weekly));
-      } else {
-        console.log("data.lenth is zero");
-      }
-    }
-  }, [weeklydata, weekly]);
+  // useEffect(() => {
+  //   if (weekly != false) {
+  //     if (weeklydata.length != 0) {
+  //       setchangeinpercent(generateChange(weeklydata, weekly));
+  //     } else {
+  //       console.log("data.lenth is zero");
+  //     }
+  //   }
+  // }, [weeklydata, weekly]);
 
   const handlechange = (e: SelectChangeEvent<number>) => {
     //console.log(e.target.value);
@@ -268,9 +278,10 @@ function CurrentStatus() {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Pair</TableCell>
+              <TableCell align="center">Pair</TableCell>
+              <TableCell align="center">DailyBinance%</TableCell>
               <TableCell
-                align="right"
+                align="center"
                 onClick={() => {
                   setsort({ sortby: "price", asc: !sort.asc });
                 }}
@@ -278,7 +289,7 @@ function CurrentStatus() {
                 <Button variant={"contained"}>PriceChange</Button>
               </TableCell>
               <TableCell
-                align="right"
+                align="center"
                 onClick={() => {
                   setsort({ sortby: "high", asc: !sort.asc });
                 }}
@@ -286,7 +297,7 @@ function CurrentStatus() {
                 <Button variant={"contained"}>High</Button>
               </TableCell>
               <TableCell
-                align="right"
+                align="center"
                 onClick={() => {
                   setsort({ sortby: "low", asc: !sort.asc });
                 }}
@@ -294,7 +305,7 @@ function CurrentStatus() {
                 <Button variant={"contained"}>Low</Button>
               </TableCell>
               <TableCell
-                align="right"
+                align="center"
                 onClick={() => {
                   setsort({ sortby: "volume", asc: !sort.asc });
                 }}
@@ -307,12 +318,13 @@ function CurrentStatus() {
             {changeinpercent.map((item) => {
               return (
                 <TableRow key={item.pair}>
-                  <TableCell align="right">{item.pair}</TableCell>
-                  <TableCell align="right">{item.pchange} %</TableCell>
-                  <TableCell align="right">{item.high} %</TableCell>
-                  <TableCell align="right">{item.low} %</TableCell>
+                  <TableCell align="center">{item.pair}</TableCell>
+                  <TableCell align="center">{item.dailypercent}</TableCell>
+                  <TableCell align="center">{item.pchange} %</TableCell>
+                  <TableCell align="center">{item.high} %</TableCell>
+                  <TableCell align="center">{item.low} %</TableCell>
 
-                  <TableCell align="right">{item.vchange} </TableCell>
+                  <TableCell align="center">{item.vchange} </TableCell>
                 </TableRow>
               );
             })}
