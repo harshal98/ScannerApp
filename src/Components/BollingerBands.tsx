@@ -228,7 +228,8 @@ function Bollinger() {
       updateDisplayTable(response);
 
       refreshinterval = setInterval(() => {
-        setrefreshdata(!refeshdata);
+        setrefreshdata((prev) => !prev);
+        setreload();
       }, 30000);
     });
 
@@ -252,8 +253,6 @@ function Bollinger() {
 
       updateDisplayTable(response);
     });
-
-    setreload();
   }, [refeshdata]);
 
   function updateDisplayTable(response: any) {
