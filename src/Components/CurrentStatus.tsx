@@ -21,16 +21,16 @@ import { get24hr } from "./GetData";
 
 function CurrentStatus() {
   const [data, timer] = useKlineData();
-  let weeklydata: {
-    pair: string;
-    data: {
-      o: number;
-      h: number;
-      l: number;
-      c: number;
-      v: number;
-    }[];
-  }[] = [];
+  // let weeklydata: {
+  //   pair: string;
+  //   data: {
+  //     o: number;
+  //     h: number;
+  //     l: number;
+  //     c: number;
+  //     v: number;
+  //   }[];
+  // }[] = [];
   const [sort, setsort] = useState<{ sortby: string; asc: boolean }>({
     sortby: "price",
     asc: true,
@@ -47,9 +47,9 @@ function CurrentStatus() {
     }[]
   >([]);
   const [weekly, setweekly] = useState(false);
-  if (weekly) {
-    [weeklydata] = useKlineData("1h");
-  }
+  // if (weekly) {
+  //   [weeklydata] = useKlineData("1h");
+  // }
   function generateChange(
     data: {
       pair: string;
