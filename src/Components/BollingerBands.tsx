@@ -22,6 +22,7 @@ type BBscanner = {
 
 type TableDisplay = {
   pair: string;
+  m1: number;
   m5: number;
   m15: number;
   h1: number;
@@ -37,8 +38,9 @@ function Bollinger() {
   //const [bbfilter, setbbfilter] = useState<string>("Long");
   const [display, setDisplay] = useState<TableDisplay[]>([]);
   // const [BBscannerobj, SetBBscannerobj] = useState<BBscanner[]>([]);
-  let timeframes = ["5m", "15m", "1h", "4h", "1d"];
-
+  let timeframes = ["1m", "5m", "15m", "1h", "4h", "1d"];
+  const [sort, setsort] = useState("daily");
+  const [refeshdata, setrefreshdata] = useState(false);
   async function generateBB(
     response: any[],
     period: string
@@ -139,6 +141,61 @@ function Bollinger() {
     });
   }
 
+  function sortData(array: TableDisplay[], sor = sort): TableDisplay[] {
+    let temp = [...array];
+
+    switch (sor) {
+      case "daily":
+        return temp.sort((i, p) => {
+          if (i.dailyrank != undefined && p.dailyrank != undefined) {
+            if (i.dailyrank > p.dailyrank) return 1;
+            else return -1;
+          }
+          return 0;
+        });
+        break;
+      case "5m":
+        return temp.sort((i, j) => {
+          if (i.m5 > j.m5) return -1;
+          else return 1;
+        });
+
+        break;
+      case "1m":
+        return temp.sort((i, j) => {
+          if (i.m1 > j.m1) return -1;
+          else return 1;
+        });
+
+        break;
+      case "15m":
+        return temp.sort((i, j) => {
+          if (i.m15 > j.m15) return -1;
+          else return 1;
+        });
+        break;
+      case "1h":
+        return temp.sort((i, j) => {
+          if (i.h1 > j.h1) return -1;
+          else return 1;
+        });
+        break;
+      case "4h":
+        return temp.sort((i, j) => {
+          if (i.h4 > j.h4) return -1;
+          else return 1;
+        });
+        break;
+      case "1d":
+        return temp.sort((i, j) => {
+          if (i.d1 > j.d1) return -1;
+          else return 1;
+        });
+        break;
+    }
+    return temp;
+  }
+
   // useEffect(() => {
   //   let temp = [...BBscannerobj];
   //   temp = temp.sort((i, j) => {
@@ -171,8 +228,7 @@ function Bollinger() {
       updateDisplayTable(response);
 
       refreshinterval = setInterval(() => {
-        setreload();
-        updateDisplayTable(response);
+        setrefreshdata(!refeshdata);
       }, 30000);
     });
 
@@ -182,6 +238,23 @@ function Bollinger() {
       //console.log("const refreshinterval cleared");
     };
   }, []);
+
+  useEffect(() => {
+    get24hr().then((response) => {
+      response = response
+        .sort((i, j) => {
+          if (i.priceChangePercent > j.priceChangePercent) return -1;
+          else return 1;
+        })
+        .map((item, index) => {
+          return { ...item, rank: index + 1 };
+        });
+
+      updateDisplayTable(response);
+    });
+
+    setreload();
+  }, [refeshdata]);
 
   function updateDisplayTable(response: any) {
     let temp = [];
@@ -193,19 +266,22 @@ function Bollinger() {
       let tempdisplay: TableDisplay[] = [];
       for (let x of FuturePairs) {
         let pair = x;
-        let m5 =
+        let m1 =
           filterBB(res[0].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
-        let m15 =
+        let m5 =
           filterBB(res[1].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
-        let h1 =
+        let m15 =
           filterBB(res[2].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
-        let h4 =
+        let h1 =
           filterBB(res[3].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
-        let d1 =
+        let h4 =
           filterBB(res[4].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
+        let d1 =
+          filterBB(res[5].filter((item) => item.pair == x)[0]) == true ? 1 : 0;
 
         tempdisplay.push({
           pair,
+          m1,
           m5,
           m15,
           h1,
@@ -216,16 +292,20 @@ function Bollinger() {
         });
       }
       setDisplay(
-        tempdisplay.sort((i, p) => {
-          if (i.dailyrank != undefined && p.dailyrank != undefined) {
-            if (i.dailyrank > p.dailyrank) return 1;
-            else return -1;
-          }
-          return 0;
-        })
+        // tempdisplay.sort((i, p) => {
+        //   if (i.dailyrank != undefined && p.dailyrank != undefined) {
+        //     if (i.dailyrank > p.dailyrank) return 1;
+        //     else return -1;
+        //   }
+        //   return 0;
+        // })
+        sortData(tempdisplay, sort)
       );
     });
   }
+  useEffect(() => {
+    setDisplay(sortData(display));
+  }, [sort]);
   // useEffect(() => console.log(BBscannerobj), [BBscannerobj]);
   function filterBB(item: BBscanner) {
     if (/*bbfilter == "Long" &&*/ item.max != undefined) {
@@ -303,65 +383,53 @@ function Bollinger() {
               <th>Pair</th>
               <th
                 onClick={() => {
-                  setDisplay(
-                    [...display].sort((i, j) => {
-                      if (i.m5 > j.m5) return -1;
-                      else return 1;
-                    })
-                  );
+                  setsort("1m");
+                }}
+              >
+                1min
+              </th>
+              <th
+                onClick={() => {
+                  setsort("5m");
                 }}
               >
                 5min
               </th>
               <th
                 onClick={() => {
-                  setDisplay(
-                    [...display].sort((i, j) => {
-                      if (i.m15 > j.m15) return -1;
-                      else return 1;
-                    })
-                  );
+                  setsort("15m");
                 }}
               >
                 15min
               </th>
               <th
                 onClick={() => {
-                  setDisplay(
-                    [...display].sort((i, j) => {
-                      if (i.h1 > j.h1) return -1;
-                      else return 1;
-                    })
-                  );
+                  setsort("1h");
                 }}
               >
                 1hour
               </th>
               <th
                 onClick={() => {
-                  setDisplay(
-                    [...display].sort((i, j) => {
-                      if (i.h4 > j.h4) return -1;
-                      else return 1;
-                    })
-                  );
+                  setsort("4h");
                 }}
               >
                 4hour
               </th>
               <th
                 onClick={() => {
-                  setDisplay(
-                    [...display].sort((i, j) => {
-                      if (i.d1 > j.d1) return -1;
-                      else return 1;
-                    })
-                  );
+                  setsort("1d");
                 }}
               >
                 1D
               </th>
-              <th>Daily%</th>
+              <th
+                onClick={() => {
+                  setsort("daily");
+                }}
+              >
+                Daily%
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -371,6 +439,13 @@ function Bollinger() {
                 return (
                   <tr key={item.pair}>
                     <td>{item.pair}</td>
+                    <td
+                      style={{
+                        backgroundColor: item.m1 == 1 ? "Yellow" : "inherit",
+                      }}
+                    >
+                      {item.m1 == 1 ? "Yes" : item.m1}
+                    </td>
                     <td
                       style={{
                         backgroundColor: item.m5 == 1 ? "Yellow" : "inherit",
