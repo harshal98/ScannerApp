@@ -164,6 +164,23 @@ function CurrentStatus() {
         });
       }
     }
+    if (sort.sortby == "daily") {
+      if (sort.asc == true) {
+        sorted = unsorted.sort((i, j) => {
+          if(i.dailypercent != undefined && j.dailypercent !=undefined){
+          if (i.dailypercent > j.dailypercent) return -1;
+          else return 1;}
+          else return -1
+        });
+      } else {
+        sorted = unsorted.sort((i, j) => {
+          if(i.dailypercent != undefined && j.dailypercent !=undefined){
+          if (i.dailypercent < j.dailypercent) return -1;
+          else return 1;}
+          else return -1
+        });
+      }
+    }
     if (sort.sortby == "high") {
       if (sort.asc == true) {
         sorted = unsorted.sort((i, j) => {
@@ -279,11 +296,13 @@ function CurrentStatus() {
           <TableHead>
             <TableRow>
               <TableCell align="center">Pair</TableCell>
-              <TableCell align="center">DailyBinance%</TableCell>
+              <TableCell align="center"  onClick={() => {
+                  setsort({ sortby: "daily", asc: sort.sortby != "daily" ? true : !sort.asc});
+                }}> <Button variant={"contained"}>DailyBinance %</Button></TableCell>
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({ sortby: "price", asc: !sort.asc });
+                  setsort({ sortby: "price", asc: sort.sortby != "price" ? true : !sort.asc});
                 }}
               >
                 <Button variant={"contained"}>PriceChange</Button>
@@ -291,7 +310,7 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({ sortby: "high", asc: !sort.asc });
+                  setsort({ sortby: "high", asc: sort.sortby != "high" ? true : !sort.asc });
                 }}
               >
                 <Button variant={"contained"}>High</Button>
@@ -299,7 +318,7 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({ sortby: "low", asc: !sort.asc });
+                  setsort({ sortby: "low", asc: sort.sortby != "low" ? false : !sort.asc });
                 }}
               >
                 <Button variant={"contained"}>Low</Button>
@@ -307,7 +326,7 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({ sortby: "volume", asc: !sort.asc });
+                  setsort({ sortby: "volume", asc: sort.sortby != "volume" ? true : !sort.asc });
                 }}
               >
                 <Button variant={"contained"}>VolumneChange</Button>
@@ -319,12 +338,12 @@ function CurrentStatus() {
               return (
                 <TableRow key={item.pair}>
                   <TableCell align="center">{item.pair}</TableCell>
-                  <TableCell align="center">{item.dailypercent}</TableCell>
+                  <TableCell align="center">{item.dailypercent} %</TableCell>
                   <TableCell align="center">{item.pchange} %</TableCell>
                   <TableCell align="center">{item.high} %</TableCell>
                   <TableCell align="center">{item.low} %</TableCell>
 
-                  <TableCell align="center">{item.vchange} </TableCell>
+                  <TableCell align="center">{item.vchange} %</TableCell>
                 </TableRow>
               );
             })}
