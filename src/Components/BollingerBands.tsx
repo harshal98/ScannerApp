@@ -298,7 +298,17 @@ function Bollinger() {
         //   }
         //   return 0;
         // })
-        sortData(tempdisplay, sort)
+
+        sortData(
+          tempdisplay.sort((i, p) => {
+            if (i.dailyrank != undefined && p.dailyrank != undefined) {
+              if (i.dailyrank > p.dailyrank) return 1;
+              else return -1;
+            }
+            return 0;
+          }),
+          sort
+        )
       );
     });
   }
