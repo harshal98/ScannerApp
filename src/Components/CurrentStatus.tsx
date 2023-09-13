@@ -295,6 +295,7 @@ function CurrentStatus() {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
+              <TableCell align="center">Index</TableCell>
               <TableCell align="center">Pair</TableCell>
               <TableCell
                 align="center"
@@ -366,9 +367,10 @@ function CurrentStatus() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {changeinpercent.map((item) => {
+            {changeinpercent.map((item, index) => {
               return (
                 <TableRow key={item.pair}>
+                  <TableCell align="center">{index + 1}</TableCell>
                   <TableCell align="center">{item.pair}</TableCell>
                   <TableCell align="center">
                     {item.PercentStatusb424hr}
