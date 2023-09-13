@@ -18,7 +18,15 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { get24hr } from "./GetData";
-
+type Change = {
+  pair: string;
+  pchange: number;
+  vchange: number;
+  high: number;
+  low: number;
+  dailypercent?: number;
+  PercentStatusb424hr: "Bullish" | "Bearish";
+};
 function CurrentStatus() {
   const [data, timer] = useKlineData();
   // let weeklydata: {
@@ -36,16 +44,7 @@ function CurrentStatus() {
     asc: true,
   });
   const [period, setperiod] = useState(19);
-  const [changeinpercent, setchangeinpercent] = useState<
-    {
-      pair: string;
-      pchange: number;
-      vchange: number;
-      high: number;
-      low: number;
-      dailypercent?: number;
-    }[]
-  >([]);
+  const [changeinpercent, setchangeinpercent] = useState<Change[]>([]);
   const [weekly, setweekly] = useState(false);
   // if (weekly) {
   //   [weeklydata] = useKlineData("1h");
@@ -63,14 +62,7 @@ function CurrentStatus() {
     }[],
     weekly: boolean = false
   ) {
-    let temparray: {
-      pair: string;
-      pchange: number;
-      vchange: number;
-      high: number;
-      low: number;
-      dailypercent?: number;
-    }[] = [];
+    let temparray: Change[] = [];
 
     let p = period;
 
@@ -105,6 +97,15 @@ function CurrentStatus() {
           v1 = v1 + Number(item.v);
         });
 
+        let PercentStatusb424hr: "Bullish" | "Bearish" = "Bearish";
+        let high46h = 0;
+
+        item.data.slice(360, 480).forEach((item) => {
+          if (high46h < item.h) high46h = item.h;
+        });
+
+        if (item.data[0].c > high46h * 0.995) PercentStatusb424hr = "Bullish";
+
         return {
           pair: item.pair,
           pchange,
@@ -114,29 +115,15 @@ function CurrentStatus() {
           dailypercent: dailydata.filter(
             (item24) => item24.pair == item.pair
           )[0].priceChangePercent,
+          PercentStatusb424hr,
         };
       });
       console.log(temparray);
       setchangeinpercent(sortData(temparray));
     });
   }
-  function sortData(
-    unsorted: {
-      pair: string;
-      pchange: number;
-      vchange: number;
-      high: number;
-      low: number;
-      dailypercent?: number;
-    }[]
-  ) {
-    let sorted: {
-      pair: string;
-      pchange: number;
-      vchange: number;
-      high: number;
-      low: number;
-    }[] = [];
+  function sortData(unsorted: Change[]) {
+    let sorted: Change[] = [];
     if (sort.sortby == "price") {
       if (sort.asc == true) {
         sorted = unsorted.sort((i, j) => {
@@ -167,17 +154,17 @@ function CurrentStatus() {
     if (sort.sortby == "daily") {
       if (sort.asc == true) {
         sorted = unsorted.sort((i, j) => {
-          if(i.dailypercent != undefined && j.dailypercent !=undefined){
-          if (i.dailypercent > j.dailypercent) return -1;
-          else return 1;}
-          else return -1
+          if (i.dailypercent != undefined && j.dailypercent != undefined) {
+            if (i.dailypercent > j.dailypercent) return -1;
+            else return 1;
+          } else return -1;
         });
       } else {
         sorted = unsorted.sort((i, j) => {
-          if(i.dailypercent != undefined && j.dailypercent !=undefined){
-          if (i.dailypercent < j.dailypercent) return -1;
-          else return 1;}
-          else return -1
+          if (i.dailypercent != undefined && j.dailypercent != undefined) {
+            if (i.dailypercent < j.dailypercent) return -1;
+            else return 1;
+          } else return -1;
         });
       }
     }
@@ -203,6 +190,19 @@ function CurrentStatus() {
       } else {
         sorted = unsorted.sort((i, j) => {
           if (i.low < j.low) return -1;
+          else return 1;
+        });
+      }
+    }
+    if (sort.sortby == "StatusB4") {
+      if (sort.asc == true) {
+        sorted = unsorted.sort((i, j) => {
+          if (i.PercentStatusb424hr > j.PercentStatusb424hr) return -1;
+          else return 1;
+        });
+      } else {
+        sorted = unsorted.sort((i, j) => {
+          if (i.PercentStatusb424hr < j.PercentStatusb424hr) return -1;
           else return 1;
         });
       }
@@ -236,13 +236,13 @@ function CurrentStatus() {
     //console.log(e.target.value);
     switch (e.target.value.toString()) {
       case "1h":
-        setperiod(19);
+        setperiod(20);
         break;
       case "4h":
-        setperiod(79);
+        setperiod(80);
         break;
       case "1d":
-        setperiod(479);
+        setperiod(480);
         break;
       case "15m":
         setperiod(4);
@@ -252,10 +252,10 @@ function CurrentStatus() {
         setperiod(1);
         break;
       case "8h":
-        setperiod(159);
+        setperiod(160);
         break;
       case "12h":
-        setperiod(241);
+        setperiod(240);
         break;
     }
   };
@@ -296,13 +296,36 @@ function CurrentStatus() {
           <TableHead>
             <TableRow>
               <TableCell align="center">Pair</TableCell>
-              <TableCell align="center"  onClick={() => {
-                  setsort({ sortby: "daily", asc: sort.sortby != "daily" ? true : !sort.asc});
-                }}> <Button variant={"contained"}>DailyBinance %</Button></TableCell>
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({ sortby: "price", asc: sort.sortby != "price" ? true : !sort.asc});
+                  setsort({
+                    sortby: "StatusB4",
+                    asc: sort.sortby != "StatusB4" ? true : !sort.asc,
+                  });
+                }}
+              >
+                <Button variant={"contained"}>StatusB4[24hr]</Button>
+              </TableCell>
+              <TableCell
+                align="center"
+                onClick={() => {
+                  setsort({
+                    sortby: "daily",
+                    asc: sort.sortby != "daily" ? true : !sort.asc,
+                  });
+                }}
+              >
+                {" "}
+                <Button variant={"contained"}>DailyBinance %</Button>
+              </TableCell>
+              <TableCell
+                align="center"
+                onClick={() => {
+                  setsort({
+                    sortby: "price",
+                    asc: sort.sortby != "price" ? true : !sort.asc,
+                  });
                 }}
               >
                 <Button variant={"contained"}>PriceChange</Button>
@@ -310,7 +333,10 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({ sortby: "high", asc: sort.sortby != "high" ? true : !sort.asc });
+                  setsort({
+                    sortby: "high",
+                    asc: sort.sortby != "high" ? true : !sort.asc,
+                  });
                 }}
               >
                 <Button variant={"contained"}>High</Button>
@@ -318,7 +344,10 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({ sortby: "low", asc: sort.sortby != "low" ? false : !sort.asc });
+                  setsort({
+                    sortby: "low",
+                    asc: sort.sortby != "low" ? false : !sort.asc,
+                  });
                 }}
               >
                 <Button variant={"contained"}>Low</Button>
@@ -326,7 +355,10 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({ sortby: "volume", asc: sort.sortby != "volume" ? true : !sort.asc });
+                  setsort({
+                    sortby: "volume",
+                    asc: sort.sortby != "volume" ? true : !sort.asc,
+                  });
                 }}
               >
                 <Button variant={"contained"}>VolumneChange</Button>
@@ -338,6 +370,9 @@ function CurrentStatus() {
               return (
                 <TableRow key={item.pair}>
                   <TableCell align="center">{item.pair}</TableCell>
+                  <TableCell align="center">
+                    {item.PercentStatusb424hr}
+                  </TableCell>
                   <TableCell align="center">{item.dailypercent} %</TableCell>
                   <TableCell align="center">{item.pchange} %</TableCell>
                   <TableCell align="center">{item.high} %</TableCell>
