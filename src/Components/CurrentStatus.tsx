@@ -373,7 +373,16 @@ function CurrentStatus() {
                   <TableCell align="center">{index + 1}</TableCell>
                   <TableCell align="center">{item.pair}</TableCell>
                   <TableCell align="center">
-                    {item.PercentStatusb424hr}
+                    <Button
+                      variant={"contained"}
+                      color={
+                        item.PercentStatusb424hr == "Bullish"
+                          ? "success"
+                          : "error"
+                      }
+                    >
+                      {item.PercentStatusb424hr}
+                    </Button>
                   </TableCell>
                   <TableCell align="center">{item.dailypercent} %</TableCell>
                   <TableCell align="center">{item.pchange} %</TableCell>
