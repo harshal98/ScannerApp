@@ -318,16 +318,24 @@ function CurrentStatus() {
                 align="center"
                 onClick={() => {
                   let temp = [...sort];
-                  temp.push({
-                    sortby: "StatusB4",
-                    asc:
-                      sort.filter((item) => item.sortby == "StatusB4")[0] ==
-                      undefined
-                        ? true
-                        : !sort.filter((item) => item.sortby == "StatusB4")[0]
-                            .asc,
-                  });
+                  let item = temp.findIndex(
+                    (item) => item.sortby == "StatusB4"
+                  );
+                  console.log(item);
 
+                  if (item != -1) {
+                    temp[item].asc = !temp[item].asc;
+                  } else {
+                    temp.push({
+                      sortby: "StatusB4",
+                      asc:
+                        sort.filter((item) => item.sortby == "StatusB4")[0] ==
+                        undefined
+                          ? true
+                          : !sort.filter((item) => item.sortby == "StatusB4")[0]
+                              .asc,
+                    });
+                  }
                   setsort(temp);
                 }}
               >
@@ -337,15 +345,22 @@ function CurrentStatus() {
                 align="center"
                 onClick={() => {
                   let temp = [...sort];
-                  temp.push({
-                    sortby: "daily",
-                    asc:
-                      sort.filter((item) => item.sortby == "daily")[0] ==
-                      undefined
-                        ? true
-                        : !sort.filter((item) => item.sortby == "daily")[0].asc,
-                  });
+                  let item = temp.findIndex((item) => item.sortby == "daily");
+                  console.log(item);
 
+                  if (item != -1) {
+                    temp[item].asc = !temp[item].asc;
+                  } else {
+                    temp.push({
+                      sortby: "daily",
+                      asc:
+                        sort.filter((item) => item.sortby == "daily")[0] ==
+                        undefined
+                          ? true
+                          : !sort.filter((item) => item.sortby == "daily")[0]
+                              .asc,
+                    });
+                  }
                   setsort(temp);
                 }}
               >
@@ -356,15 +371,22 @@ function CurrentStatus() {
                 align="center"
                 onClick={() => {
                   let temp = [...sort];
-                  temp.push({
-                    sortby: "price",
-                    asc:
-                      sort.filter((item) => item.sortby == "price")[0] ==
-                      undefined
-                        ? true
-                        : !sort.filter((item) => item.sortby == "price")[0].asc,
-                  });
+                  let item = temp.findIndex((item) => item.sortby == "price");
+                  console.log(item);
 
+                  if (item != -1) {
+                    temp[item].asc = !temp[item].asc;
+                  } else {
+                    temp.push({
+                      sortby: "price",
+                      asc:
+                        sort.filter((item) => item.sortby == "price")[0] ==
+                        undefined
+                          ? true
+                          : !sort.filter((item) => item.sortby == "price")[0]
+                              .asc,
+                    });
+                  }
                   setsort(temp);
                 }}
               >
@@ -374,15 +396,22 @@ function CurrentStatus() {
                 align="center"
                 onClick={() => {
                   let temp = [...sort];
-                  temp.push({
-                    sortby: "high",
-                    asc:
-                      sort.filter((item) => item.sortby == "high")[0] ==
-                      undefined
-                        ? true
-                        : !sort.filter((item) => item.sortby == "high")[0].asc,
-                  });
+                  let item = temp.findIndex((item) => item.sortby == "high");
+                  console.log(item);
 
+                  if (item != -1) {
+                    temp[item].asc = !temp[item].asc;
+                  } else {
+                    temp.push({
+                      sortby: "high",
+                      asc:
+                        sort.filter((item) => item.sortby == "high")[0] ==
+                        undefined
+                          ? true
+                          : !sort.filter((item) => item.sortby == "high")[0]
+                              .asc,
+                    });
+                  }
                   setsort(temp);
                 }}
               >
@@ -392,14 +421,22 @@ function CurrentStatus() {
                 align="center"
                 onClick={() => {
                   let temp = [...sort];
-                  temp.push({
-                    sortby: "low",
-                    asc:
-                      sort.filter((item) => item.sortby == "low")[0] ==
-                      undefined
-                        ? true
-                        : !sort.filter((item) => item.sortby == "low")[0].asc,
-                  });
+                  let item = temp.findIndex((item) => item.sortby == "low");
+                  console.log(item);
+
+                  if (item != -1) {
+                    temp[item].asc = !temp[item].asc;
+                  } else {
+                    temp.push({
+                      sortby: "low",
+                      asc:
+                        sort.filter((item) => item.sortby == "low")[0] ==
+                        undefined
+                          ? true
+                          : !sort.filter((item) => item.sortby == "low")[0].asc,
+                    });
+                  }
+                  setsort(temp);
 
                   setsort(temp);
                 }}
@@ -410,16 +447,22 @@ function CurrentStatus() {
                 align="center"
                 onClick={() => {
                   let temp = [...sort];
-                  temp.push({
-                    sortby: "volume",
-                    asc:
-                      sort.filter((item) => item.sortby == "volume")[0] ==
-                      undefined
-                        ? true
-                        : !sort.filter((item) => item.sortby == "volume")[0]
-                            .asc,
-                  });
+                  let item = temp.findIndex((item) => item.sortby == "volume");
+                  console.log(item);
 
+                  if (item != -1) {
+                    temp[item].asc = !temp[item].asc;
+                  } else {
+                    temp.push({
+                      sortby: "volume",
+                      asc:
+                        sort.filter((item) => item.sortby == "volume")[0] ==
+                        undefined
+                          ? true
+                          : !sort.filter((item) => item.sortby == "volume")[0]
+                              .asc,
+                    });
+                  }
                   setsort(temp);
                 }}
               >
