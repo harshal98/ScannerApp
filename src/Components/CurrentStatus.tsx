@@ -39,10 +39,12 @@ function CurrentStatus() {
   //     v: number;
   //   }[];
   // }[] = [];
-  const [sort, setsort] = useState<{ sortby: string; asc: boolean }>({
-    sortby: "price",
-    asc: true,
-  });
+  const [sort, setsort] = useState<{ sortby: string; asc: boolean }[]>([
+    {
+      sortby: "price",
+      asc: true,
+    },
+  ]);
   const [period, setperiod] = useState(19);
   const [changeinpercent, setchangeinpercent] = useState<Change[]>([]);
   const [weekly, setweekly] = useState(false);
@@ -119,10 +121,19 @@ function CurrentStatus() {
         };
       });
       console.log(temparray);
-      setchangeinpercent(sortData(temparray));
+      for (let x of sort) {
+        temparray = sortData(x, temparray);
+      }
+      setchangeinpercent(temparray);
     });
   }
-  function sortData(unsorted: Change[]) {
+  function sortData(
+    sort: {
+      sortby: string;
+      asc: boolean;
+    },
+    unsorted: Change[]
+  ) {
     let sorted: Change[] = [];
     if (sort.sortby == "price") {
       if (sort.asc == true) {
@@ -210,7 +221,13 @@ function CurrentStatus() {
     return sorted;
   }
   useEffect(() => {
-    setchangeinpercent(sortData(changeinpercent));
+    console.log(sort);
+
+    let temp = [...changeinpercent];
+    for (let x of sort) {
+      temp = sortData(x, changeinpercent);
+    }
+    setchangeinpercent(temp);
   }, [sort]);
   //UseEffect for daily percentagechane
   useEffect(() => {
@@ -300,10 +317,18 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({
+                  let temp = [...sort];
+                  temp.push({
                     sortby: "StatusB4",
-                    asc: sort.sortby != "StatusB4" ? true : !sort.asc,
+                    asc:
+                      sort.filter((item) => item.sortby == "StatusB4")[0] ==
+                      undefined
+                        ? true
+                        : !sort.filter((item) => item.sortby == "StatusB4")[0]
+                            .asc,
                   });
+
+                  setsort(temp);
                 }}
               >
                 <Button variant={"contained"}>StatusB4[24hr]</Button>
@@ -311,10 +336,17 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({
+                  let temp = [...sort];
+                  temp.push({
                     sortby: "daily",
-                    asc: sort.sortby != "daily" ? true : !sort.asc,
+                    asc:
+                      sort.filter((item) => item.sortby == "daily")[0] ==
+                      undefined
+                        ? true
+                        : !sort.filter((item) => item.sortby == "daily")[0].asc,
                   });
+
+                  setsort(temp);
                 }}
               >
                 {" "}
@@ -323,10 +355,17 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({
+                  let temp = [...sort];
+                  temp.push({
                     sortby: "price",
-                    asc: sort.sortby != "price" ? true : !sort.asc,
+                    asc:
+                      sort.filter((item) => item.sortby == "price")[0] ==
+                      undefined
+                        ? true
+                        : !sort.filter((item) => item.sortby == "price")[0].asc,
                   });
+
+                  setsort(temp);
                 }}
               >
                 <Button variant={"contained"}>PriceChange</Button>
@@ -334,10 +373,17 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({
+                  let temp = [...sort];
+                  temp.push({
                     sortby: "high",
-                    asc: sort.sortby != "high" ? true : !sort.asc,
+                    asc:
+                      sort.filter((item) => item.sortby == "high")[0] ==
+                      undefined
+                        ? true
+                        : !sort.filter((item) => item.sortby == "high")[0].asc,
                   });
+
+                  setsort(temp);
                 }}
               >
                 <Button variant={"contained"}>High</Button>
@@ -345,10 +391,17 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({
+                  let temp = [...sort];
+                  temp.push({
                     sortby: "low",
-                    asc: sort.sortby != "low" ? false : !sort.asc,
+                    asc:
+                      sort.filter((item) => item.sortby == "low")[0] ==
+                      undefined
+                        ? true
+                        : !sort.filter((item) => item.sortby == "low")[0].asc,
                   });
+
+                  setsort(temp);
                 }}
               >
                 <Button variant={"contained"}>Low</Button>
@@ -356,10 +409,18 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setsort({
+                  let temp = [...sort];
+                  temp.push({
                     sortby: "volume",
-                    asc: sort.sortby != "volume" ? true : !sort.asc,
+                    asc:
+                      sort.filter((item) => item.sortby == "volume")[0] ==
+                      undefined
+                        ? true
+                        : !sort.filter((item) => item.sortby == "volume")[0]
+                            .asc,
                   });
+
+                  setsort(temp);
                 }}
               >
                 <Button variant={"contained"}>VolumneChange</Button>
