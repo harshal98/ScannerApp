@@ -26,6 +26,7 @@ type Change = {
   low: number;
   dailypercent?: number;
   PercentStatusb424hr: "Bullish" | "Bearish";
+  dailyIndex?: number;
 };
 function CurrentStatus() {
   const [data, timer] = useKlineData();
@@ -41,7 +42,7 @@ function CurrentStatus() {
   // }[] = [];
   const [sort, setsort] = useState<{ sortby: string; asc: boolean }[]>([
     {
-      sortby: "price",
+      sortby: "daily",
       asc: true,
     },
   ]);
@@ -169,6 +170,9 @@ function CurrentStatus() {
             if (i.dailypercent > j.dailypercent) return -1;
             else return 1;
           } else return -1;
+        });
+        sorted = sorted.map((item, index) => {
+          return { ...item, dailyIndex: index + 1 };
         });
       } else {
         sorted = unsorted.sort((i, j) => {
@@ -341,6 +345,7 @@ function CurrentStatus() {
               >
                 <Button variant={"contained"}>StatusB4[24hr]</Button>
               </TableCell>
+              <TableCell align="center">DailyIndex</TableCell>
               <TableCell
                 align="center"
                 onClick={() => {
@@ -488,6 +493,7 @@ function CurrentStatus() {
                       {item.PercentStatusb424hr}
                     </Button>
                   </TableCell>
+                  <TableCell align="center">{item.dailyIndex}</TableCell>
                   <TableCell align="center">{item.dailypercent} %</TableCell>
                   <TableCell align="center">{item.pchange} %</TableCell>
                   <TableCell align="center">{item.high} %</TableCell>
