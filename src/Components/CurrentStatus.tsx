@@ -9,6 +9,7 @@ import {
   InputLabel,
   MenuItem,
   SelectChangeEvent,
+  //Input,
 } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -48,7 +49,7 @@ function CurrentStatus() {
   ]);
   const [period, setperiod] = useState(19);
   const [changeinpercent, setchangeinpercent] = useState<Change[]>([]);
-  const [weekly, setweekly] = useState(false);
+  const [weekly /*setweekly*/] = useState(false);
   // if (weekly) {
   //   [weeklydata] = useKlineData("1h");
   // }
@@ -253,32 +254,33 @@ function CurrentStatus() {
   //   }
   // }, [weeklydata, weekly]);
 
-  const handlechange = (e: SelectChangeEvent<number>) => {
-    //console.log(e.target.value);
-    switch (e.target.value.toString()) {
-      case "1h":
-        setperiod(20);
-        break;
-      case "4h":
-        setperiod(80);
-        break;
-      case "1d":
-        setperiod(480);
-        break;
-      case "15m":
-        setperiod(4);
+  const handlechange = (e: SelectChangeEvent<Number>) => {
+    console.log(e.target.value);
+    setperiod(20 * Number(e.target.value));
+    // switch (e.target.value.toString()) {
+    //   case "1h":
+    //     setperiod(20);
+    //     break;
+    //   case "4h":
+    //     setperiod(80);
+    //     break;
+    //   case "1d":
+    //     setperiod(480);
+    //     break;
+    //   case "15m":
+    //     setperiod(4);
 
-        break;
-      case "5m":
-        setperiod(1);
-        break;
-      case "8h":
-        setperiod(160);
-        break;
-      case "12h":
-        setperiod(240);
-        break;
-    }
+    //     break;
+    //   case "5m":
+    //     setperiod(1);
+    //     break;
+    //   case "8h":
+    //     setperiod(160);
+    //     break;
+    //   case "12h":
+    //     setperiod(240);
+    //     break;
+    // }
   };
 
   return (
@@ -293,23 +295,30 @@ function CurrentStatus() {
                 id="demo-simple-select"
                 label="Interval"
                 onChange={handlechange}
-                defaultValue={0}
+                defaultValue={1}
               >
-                <MenuItem value={"1d"}>1d</MenuItem>
-                <MenuItem value={"12h"}>12h</MenuItem>
-                <MenuItem value={"8h"}>8h</MenuItem>
-                <MenuItem value={"4h"}>4h</MenuItem>
-                <MenuItem value={"1h"}>1h</MenuItem>
-                <MenuItem value={"15m"}>15m</MenuItem>
-                <MenuItem value={"5m"}>5m</MenuItem>
+                <MenuItem value={24}>1d</MenuItem>
+                <MenuItem value={12}>12h</MenuItem>
+                <MenuItem value={8}>8h</MenuItem>
+                <MenuItem value={4}>4h</MenuItem>
+                <MenuItem value={3}>3h</MenuItem>
+                <MenuItem value={2}>2h</MenuItem>
+                <MenuItem value={1}>1h</MenuItem>
+                <MenuItem value={0.25}>15m</MenuItem>
               </Select>
+              {/* <Input
+                defaultValue={1}
+                onBlur={(e) => {
+                  handlechange(e);
+                }}
+              ></Input> */}
             </FormControl>
           </Box>
         )}
 
-        <Button variant={"contained"} onClick={() => setweekly(!weekly)}>
+        {/* <Button variant={"contained"} onClick={() => setweekly(!weekly)}>
           Weekly Status
-        </Button>
+        </Button> */}
       </Stack>
       <p>{timer}</p>
       <TableContainer component={Paper}>
@@ -441,7 +450,6 @@ function CurrentStatus() {
                           : !sort.filter((item) => item.sortby == "low")[0].asc,
                     });
                   }
-                  setsort(temp);
 
                   setsort(temp);
                 }}
