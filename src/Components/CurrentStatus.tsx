@@ -72,7 +72,7 @@ function CurrentStatus() {
 
     if (weekly == true) p = 167;
     get24hr().then((dailydata) => {
-      console.log(data);
+      //console.log(data);
 
       temparray = data.map((item) => {
         let pchange = Number(
@@ -122,7 +122,7 @@ function CurrentStatus() {
           PercentStatusb424hr,
         };
       });
-      console.log(temparray);
+      //console.log(temparray);
       for (let x of sort) {
         temparray = sortData(x, temparray);
       }
@@ -226,7 +226,7 @@ function CurrentStatus() {
     return sorted;
   }
   useEffect(() => {
-    console.log(sort);
+    //console.log(sort);
 
     let temp = [...changeinpercent];
     for (let x of sort) {
@@ -239,7 +239,7 @@ function CurrentStatus() {
     if (data.length != 0 && weekly == false) {
       generateChange(data);
     } else {
-      console.log("data.lenth is zero");
+      //console.log("data.lenth is zero");
     }
   }, [data, period, weekly]);
 
@@ -255,7 +255,7 @@ function CurrentStatus() {
   // }, [weeklydata, weekly]);
 
   const handlechange = (e: SelectChangeEvent<Number>) => {
-    console.log(e.target.value);
+    //console.log(e.target.value);
     setperiod(20 * Number(e.target.value));
     // switch (e.target.value.toString()) {
     //   case "1h":
@@ -282,6 +282,27 @@ function CurrentStatus() {
     //     break;
     // }
   };
+  function setSortState(sortbydata: string) {
+    let temp = [...sort];
+    let index = temp.findIndex((item) => item.sortby == sortbydata);
+
+    if (index != -1) {
+      let item = temp[index];
+      temp = temp.filter((item1) => item1.sortby != sortbydata);
+      //console.log();
+
+      temp.push({
+        sortby: item.sortby,
+        asc: index == temp.length ? !item.asc : true,
+      });
+    } else {
+      temp.push({
+        sortby: sortbydata,
+        asc: true,
+      });
+    }
+    setsort(temp);
+  }
 
   return (
     <Stack>
@@ -330,26 +351,7 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  let temp = [...sort];
-                  let item = temp.findIndex(
-                    (item) => item.sortby == "StatusB4"
-                  );
-                  console.log(item);
-
-                  if (item != -1) {
-                    temp[item].asc = !temp[item].asc;
-                  } else {
-                    temp.push({
-                      sortby: "StatusB4",
-                      asc:
-                        sort.filter((item) => item.sortby == "StatusB4")[0] ==
-                        undefined
-                          ? true
-                          : !sort.filter((item) => item.sortby == "StatusB4")[0]
-                              .asc,
-                    });
-                  }
-                  setsort(temp);
+                  setSortState("StatusB4");
                 }}
               >
                 <Button variant={"contained"}>StatusB4[24hr]</Button>
@@ -358,24 +360,7 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  let temp = [...sort];
-                  let item = temp.findIndex((item) => item.sortby == "daily");
-                  console.log(item);
-
-                  if (item != -1) {
-                    temp[item].asc = !temp[item].asc;
-                  } else {
-                    temp.push({
-                      sortby: "daily",
-                      asc:
-                        sort.filter((item) => item.sortby == "daily")[0] ==
-                        undefined
-                          ? true
-                          : !sort.filter((item) => item.sortby == "daily")[0]
-                              .asc,
-                    });
-                  }
-                  setsort(temp);
+                  setSortState("daily");
                 }}
               >
                 {" "}
@@ -384,24 +369,7 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  let temp = [...sort];
-                  let item = temp.findIndex((item) => item.sortby == "price");
-                  console.log(item);
-
-                  if (item != -1) {
-                    temp[item].asc = !temp[item].asc;
-                  } else {
-                    temp.push({
-                      sortby: "price",
-                      asc:
-                        sort.filter((item) => item.sortby == "price")[0] ==
-                        undefined
-                          ? true
-                          : !sort.filter((item) => item.sortby == "price")[0]
-                              .asc,
-                    });
-                  }
-                  setsort(temp);
+                  setSortState("price");
                 }}
               >
                 <Button variant={"contained"}>PriceChange</Button>
@@ -409,24 +377,7 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  let temp = [...sort];
-                  let item = temp.findIndex((item) => item.sortby == "high");
-                  console.log(item);
-
-                  if (item != -1) {
-                    temp[item].asc = !temp[item].asc;
-                  } else {
-                    temp.push({
-                      sortby: "high",
-                      asc:
-                        sort.filter((item) => item.sortby == "high")[0] ==
-                        undefined
-                          ? true
-                          : !sort.filter((item) => item.sortby == "high")[0]
-                              .asc,
-                    });
-                  }
-                  setsort(temp);
+                  setSortState("high");
                 }}
               >
                 <Button variant={"contained"}>High</Button>
@@ -434,24 +385,7 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  let temp = [...sort];
-                  let item = temp.findIndex((item) => item.sortby == "low");
-                  console.log(item);
-
-                  if (item != -1) {
-                    temp[item].asc = !temp[item].asc;
-                  } else {
-                    temp.push({
-                      sortby: "low",
-                      asc:
-                        sort.filter((item) => item.sortby == "low")[0] ==
-                        undefined
-                          ? true
-                          : !sort.filter((item) => item.sortby == "low")[0].asc,
-                    });
-                  }
-
-                  setsort(temp);
+                  setSortState("low");
                 }}
               >
                 <Button variant={"contained"}>Low</Button>
@@ -459,24 +393,7 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  let temp = [...sort];
-                  let item = temp.findIndex((item) => item.sortby == "volume");
-                  console.log(item);
-
-                  if (item != -1) {
-                    temp[item].asc = !temp[item].asc;
-                  } else {
-                    temp.push({
-                      sortby: "volume",
-                      asc:
-                        sort.filter((item) => item.sortby == "volume")[0] ==
-                        undefined
-                          ? true
-                          : !sort.filter((item) => item.sortby == "volume")[0]
-                              .asc,
-                    });
-                  }
-                  setsort(temp);
+                  setSortState("volume");
                 }}
               >
                 <Button variant={"contained"}>VolumneChange</Button>
