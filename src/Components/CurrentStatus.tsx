@@ -108,7 +108,7 @@ function CurrentStatus() {
           if (high46h < item.h) high46h = item.h;
         });
 
-        if (item.data[0].c > high46h * 0.995) PercentStatusb424hr = "Bullish";
+        if (item.data[0].c > high46h * 0.99) PercentStatusb424hr = "Bullish";
 
         return {
           pair: item.pair,
