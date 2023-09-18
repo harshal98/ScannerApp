@@ -405,7 +405,16 @@ function CurrentStatus() {
               return (
                 <TableRow key={item.pair}>
                   <TableCell align="center">{index + 1}</TableCell>
-                  <TableCell align="center">{item.pair}</TableCell>
+                  <TableCell align="center">
+                    {
+                      <a
+                        href={`https://www.tradingview.com/chart/V7sMPZg2/?symbol=BINANCE:${item.pair}`}
+                        target="_blank"
+                      >
+                        {item.pair}
+                      </a>
+                    }
+                  </TableCell>
                   <TableCell align="center">
                     <Button
                       variant={"contained"}
