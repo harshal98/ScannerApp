@@ -9,6 +9,7 @@ import {
   InputLabel,
   MenuItem,
   SelectChangeEvent,
+  Link,
   //Input,
 } from "@mui/material";
 import Table from "@mui/material/Table";
@@ -407,12 +408,13 @@ function CurrentStatus() {
                   <TableCell align="center">{index + 1}</TableCell>
                   <TableCell align="center">
                     {
-                      <a
+                      <Link
                         href={`https://www.tradingview.com/chart/V7sMPZg2/?symbol=BINANCE:${item.pair}`}
                         target="_blank"
+                        underline="hover"
                       >
                         {item.pair}
-                      </a>
+                      </Link>
                     }
                   </TableCell>
                   <TableCell align="center">
