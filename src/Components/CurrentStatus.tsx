@@ -114,11 +114,11 @@ function CurrentStatus() {
         });
 
         let v1h0 = 0;
-        item.data.slice(0, 20 * 4 + 1).forEach((item) => {
+        item.data.slice(0, 20 + 1).forEach((item) => {
           v1h0 = v1h0 + Number(item.v);
         });
         let v1h1 = 0;
-        item.data.slice(20 * 4 + 1, 20 * 4 + 1 + 20 * 4 + 1).forEach((item) => {
+        item.data.slice(20 + 1, 20 + 1 + 20 + 1).forEach((item) => {
           v1h1 = v1h1 + Number(item.v);
         });
 
