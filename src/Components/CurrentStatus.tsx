@@ -29,6 +29,7 @@ type Change = {
   dailypercent?: number;
   PercentStatusb424hr: "Bullish" | "Bearish";
   dailyIndex?: number;
+  v4h: number;
 };
 function CurrentStatus() {
   const [data, timer] = useKlineData();
@@ -102,6 +103,15 @@ function CurrentStatus() {
           v1 = v1 + Number(item.v);
         });
 
+        let v4h0 = 0;
+        item.data.slice(0, 20 * 4 + 1).forEach((item) => {
+          v4h0 = v4h0 + Number(item.v);
+        });
+        let v4h1 = 0;
+        item.data.slice(20 * 4 + 1, 20 * 4 + 1 + 20 * 4 + 1).forEach((item) => {
+          v4h1 = v4h1 + Number(item.v);
+        });
+
         let PercentStatusb424hr: "Bullish" | "Bearish" = "Bearish";
         let high46h = 0;
 
@@ -121,6 +131,7 @@ function CurrentStatus() {
             (item24) => item24.pair == item.pair
           )[0].priceChangePercent,
           PercentStatusb424hr,
+          v4h: Number(((v4h0 / v4h1) * 100).toFixed(2)),
         };
       });
       //console.log(temparray);
@@ -399,6 +410,7 @@ function CurrentStatus() {
               >
                 <Button variant={"contained"}>VolumneChange</Button>
               </TableCell>
+              <TableCell align="center">Volumne 4h Change</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -436,6 +448,14 @@ function CurrentStatus() {
                   <TableCell align="center">{item.low} %</TableCell>
 
                   <TableCell align="center">{item.vchange} %</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant={"contained"}
+                      color={item.v4h > 150 ? "success" : "error"}
+                    >
+                      {item.v4h} %
+                    </Button>
+                  </TableCell>
                 </TableRow>
               );
             })}
