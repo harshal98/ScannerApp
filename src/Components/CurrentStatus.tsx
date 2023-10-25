@@ -3,12 +3,12 @@ import useKlineData from "../hooks/useKlineData";
 import {
   Stack,
   Button,
-  Select,
+  //Select,
   Box,
   FormControl,
-  InputLabel,
-  MenuItem,
-  SelectChangeEvent,
+  //InputLabel,
+  //MenuItem,
+  //SelectChangeEvent,
   Link,
   //Input,
 } from "@mui/material";
@@ -22,13 +22,9 @@ import Paper from "@mui/material/Paper";
 import { get24hr } from "./GetData";
 type Change = {
   pair: string;
-  pchange: number;
-  high: number;
-  low: number;
   dailypercent?: number;
   PercentStatusb424hr: "Bullish" | "Bearish";
   dailyIndex?: number;
-  vma15m: "Yes" | "No";
   vma1h: "Yes" | "No";
   vma4h: "Yes" | "No";
   vma1d: "Yes" | "No";
@@ -51,7 +47,7 @@ function CurrentStatus() {
       asc: true,
     },
   ]);
-  const [period, setperiod] = useState(19);
+  //const [period, setperiod] = useState(19);
   const [changeinpercent, setchangeinpercent] = useState<Change[]>([]);
   const [weekly /*setweekly*/] = useState(false);
   // if (weekly) {
@@ -67,61 +63,61 @@ function CurrentStatus() {
         c: number;
         v: number;
       }[];
-    }[],
-    weekly: boolean = false
+    }[]
+    //weekly: boolean = false
   ) {
     let temparray: Change[] = [];
 
-    let p = period;
+    //let p = period;
 
-    if (weekly == true) p = 167;
+    //if (weekly == true) p = 167;
     get24hr().then((dailydata) => {
       //console.log(data);
 
       temparray = data.map((item) => {
-        let pchange = Number(
-          ((item.data[0].c / item.data[p].c) * 100 - 100).toFixed(1)
-        );
+        // let pchange = Number(
+        //   ((item.data[0].c / item.data[p].c) * 100 - 100).toFixed(1)
+        // );
 
-        let high = 0;
+        // let high = 0;
 
-        item.data.slice(0, p + 1).forEach((item) => {
-          if (high < item.h) high = Number(item.h);
-        });
-        //console.log(item.pair, high, item.data);
+        // item.data.slice(0, p + 1).forEach((item) => {
+        //   if (high < item.h) high = Number(item.h);
+        // });
+        // //console.log(item.pair, high, item.data);
 
-        let low = 99999999999;
+        // let low = 99999999999;
 
-        item.data.slice(0, p + 1).forEach((item) => {
-          if (low > item.l) low = Number(item.l);
-        });
+        // item.data.slice(0, p + 1).forEach((item) => {
+        //   if (low > item.l) low = Number(item.l);
+        // });
 
-        let v0 = 0;
-        item.data.slice(0, p + 1).forEach((item) => {
-          v0 = v0 + Number(item.v);
-        });
-        let v1 = 0;
-        item.data.slice(p + 1, p + 1 + p + 1).forEach((item) => {
-          v1 = v1 + Number(item.v);
-        });
+        // let v0 = 0;
+        // item.data.slice(0, p + 1).forEach((item) => {
+        //   v0 = v0 + Number(item.v);
+        // });
+        // let v1 = 0;
+        // item.data.slice(p + 1, p + 1 + p + 1).forEach((item) => {
+        //   v1 = v1 + Number(item.v);
+        // });
 
-        let v4h0 = 0;
-        item.data.slice(0, 20 * 4 + 1).forEach((item) => {
-          v4h0 = v4h0 + Number(item.v);
-        });
-        let v4h1 = 0;
-        item.data.slice(20 * 4 + 1, 20 * 4 + 1 + 20 * 4 + 1).forEach((item) => {
-          v4h1 = v4h1 + Number(item.v);
-        });
+        // let v4h0 = 0;
+        // item.data.slice(0, 20 * 4 + 1).forEach((item) => {
+        //   v4h0 = v4h0 + Number(item.v);
+        // });
+        // let v4h1 = 0;
+        // item.data.slice(20 * 4 + 1, 20 * 4 + 1 + 20 * 4 + 1).forEach((item) => {
+        //   v4h1 = v4h1 + Number(item.v);
+        // });
 
-        let v1h0 = 0;
-        item.data.slice(0, 20 + 1).forEach((item) => {
-          v1h0 = v1h0 + Number(item.v);
-        });
-        let v1h1 = 0;
-        item.data.slice(20 + 1, 20 + 1 + 20 + 1).forEach((item) => {
-          v1h1 = v1h1 + Number(item.v);
-        });
+        // let v1h0 = 0;
+        // item.data.slice(0, 20 + 1).forEach((item) => {
+        //   v1h0 = v1h0 + Number(item.v);
+        // });
+        // let v1h1 = 0;
+        // item.data.slice(20 + 1, 20 + 1 + 20 + 1).forEach((item) => {
+        //   v1h1 = v1h1 + Number(item.v);
+        // });
 
         let PercentStatusb424hr: "Bullish" | "Bearish" = "Bearish";
         let high46h = 0;
@@ -137,28 +133,46 @@ function CurrentStatus() {
         let vma4h: "Yes" | "No" = "No";
         let vma1d: "Yes" | "No" = "No";
 
-        let sum15v = 0;
-        for (let i = 0; i < 25 * 5; i++) {
-          sum15v = sum15v + Number(item.data[i].v);
-        }
-        let last15mv = 0;
-        for (let i = 0; i < 5; i++) {
-          last15mv = last15mv + Number(item.data[i].v);
-        }
-        vma15m = sum15v / 25 < last15mv ? "Yes" : "No";
-        console.log(item.pair, sum15v / 25, last15mv, "15m");
-
         let sum1hv = 0;
 
-        for (let i = 0; i < 25 * 20; i++) {
+        for (let i = 0; i < 25; i++) {
           sum1hv = sum1hv + Number(item.data[i].v);
         }
-        let last1hv = 0;
-        for (let i = 0; i < 20; i++) {
-          last1hv = last1hv + Number(item.data[i].v);
+
+        let last6klineHighVol = item.data[0].v;
+        // for (let i = 0; i < 6; i++) {
+        //   if (last6klineHighVol < Number(item.data[i].v))
+        //     last6klineHighVol = Number(item.data[i].v);
+        // }
+        vma1h = sum1hv / 25 < last6klineHighVol ? "Yes" : "No";
+        //console.log(item.pair, sum1hv / 25, last6klineHighVol, "1h");
+        let sum4hv = 0;
+
+        for (let i = 0; i < 25; i++) {
+          sum4hv = sum4hv + Number(item.data[i].v);
         }
-        vma1h = sum1hv / 25 < last1hv ? "Yes" : "No";
-        console.log(item.pair, sum1hv / 25, last1hv, "1h");
+
+        let last4hVol = 0;
+
+        for (let i = 0; i < 4; i++) {
+          last4hVol = last4hVol + Number(item.data[i].v);
+        }
+        vma4h = sum4hv / 25 < last4hVol ? "Yes" : "No";
+        //console.log(item.pair, sum4hv / 25, last6klineHighVol, "1h");
+
+        let sum1dv = 0;
+
+        for (let i = 0; i < 24 * 25; i++) {
+          sum1dv = sum1dv + Number(item.data[i].v);
+        }
+
+        let lastcandelvol = 0;
+
+        for (let i = 0; i < 24; i++) {
+          lastcandelvol = lastcandelvol + Number(item.data[i].v);
+        }
+        vma1d = sum1dv / 25 < lastcandelvol ? "Yes" : "No";
+        console.log(item.pair, sum1dv / 25, lastcandelvol, "1D");
         // let sum4hv = 0;
         // console.log(item.pair, item.data);
 
@@ -175,9 +189,9 @@ function CurrentStatus() {
 
         return {
           pair: item.pair,
-          pchange,
-          high: Number(((high / item.data[p].c) * 100 - 100).toFixed(1)),
-          low: Number(((low / item.data[p].c) * 100 - 100).toFixed(1)),
+          // pchange,
+          //high: Number(((high / item.data[p].c) * 100 - 100).toFixed(1)),
+          //low: Number(((low / item.data[p].c) * 100 - 100).toFixed(1)),
           dailypercent: dailydata.filter(
             (item24) => item24.pair == item.pair
           )[0].priceChangePercent,
@@ -203,19 +217,19 @@ function CurrentStatus() {
     unsorted: Change[]
   ) {
     let sorted: Change[] = [];
-    if (sort.sortby == "price") {
-      if (sort.asc == true) {
-        sorted = unsorted.sort((i, j) => {
-          if (i.pchange > j.pchange) return -1;
-          else return 1;
-        });
-      } else {
-        sorted = unsorted.sort((i, j) => {
-          if (i.pchange < j.pchange) return -1;
-          else return 1;
-        });
-      }
-    }
+    // if (sort.sortby == "price") {
+    //   if (sort.asc == true) {
+    //     sorted = unsorted.sort((i, j) => {
+    //       if (i.pchange > j.pchange) return -1;
+    //       else return 1;
+    //     });
+    //   } else {
+    //     sorted = unsorted.sort((i, j) => {
+    //       if (i.pchange < j.pchange) return -1;
+    //       else return 1;
+    //     });
+    //   }
+    // }
 
     if (sort.sortby == "daily") {
       if (sort.asc == true) {
@@ -237,32 +251,32 @@ function CurrentStatus() {
         });
       }
     }
-    if (sort.sortby == "high") {
-      if (sort.asc == true) {
-        sorted = unsorted.sort((i, j) => {
-          if (i.high > j.high) return -1;
-          else return 1;
-        });
-      } else {
-        sorted = unsorted.sort((i, j) => {
-          if (i.high < j.high) return -1;
-          else return 1;
-        });
-      }
-    }
-    if (sort.sortby == "low") {
-      if (sort.asc == true) {
-        sorted = unsorted.sort((i, j) => {
-          if (i.low > j.low) return -1;
-          else return 1;
-        });
-      } else {
-        sorted = unsorted.sort((i, j) => {
-          if (i.low < j.low) return -1;
-          else return 1;
-        });
-      }
-    }
+    // if (sort.sortby == "high") {
+    //   if (sort.asc == true) {
+    //     sorted = unsorted.sort((i, j) => {
+    //       if (i.high > j.high) return -1;
+    //       else return 1;
+    //     });
+    //   } else {
+    //     sorted = unsorted.sort((i, j) => {
+    //       if (i.high < j.high) return -1;
+    //       else return 1;
+    //     });
+    //   }
+    // }
+    // if (sort.sortby == "low") {
+    //   if (sort.asc == true) {
+    //     sorted = unsorted.sort((i, j) => {
+    //       if (i.low > j.low) return -1;
+    //       else return 1;
+    //     });
+    //   } else {
+    //     sorted = unsorted.sort((i, j) => {
+    //       if (i.low < j.low) return -1;
+    //       else return 1;
+    //     });
+    //   }
+    // }
     if (sort.sortby == "StatusB4") {
       if (sort.asc == true) {
         sorted = unsorted.sort((i, j) => {
@@ -279,12 +293,12 @@ function CurrentStatus() {
     if (sort.sortby == "volume") {
       if (sort.asc == true) {
         sorted = unsorted.sort((i, j) => {
-          if (i.vma15m > j.vma15m) return -1;
+          if (i.vma1h > j.vma1h) return -1;
           else return 1;
         });
       } else {
         sorted = unsorted.sort((i, j) => {
-          if (i.vma15m < j.vma15m) return -1;
+          if (i.vma1h < j.vma1h) return -1;
           else return 1;
         });
       }
@@ -307,7 +321,7 @@ function CurrentStatus() {
     } else {
       //console.log("data.lenth is zero");
     }
-  }, [data, period, weekly]);
+  }, [data, weekly]);
 
   //UseEffect for Weekly percentagechane
   // useEffect(() => {
@@ -320,34 +334,34 @@ function CurrentStatus() {
   //   }
   // }, [weeklydata, weekly]);
 
-  const handlechange = (e: SelectChangeEvent<Number>) => {
-    //console.log(e.target.value);
-    setperiod(20 * Number(e.target.value));
-    // switch (e.target.value.toString()) {
-    //   case "1h":
-    //     setperiod(20);
-    //     break;
-    //   case "4h":
-    //     setperiod(80);
-    //     break;
-    //   case "1d":
-    //     setperiod(480);
-    //     break;
-    //   case "15m":
-    //     setperiod(4);
+  // const handlechange = (e: SelectChangeEvent<Number>) => {
+  //   //console.log(e.target.value);
+  //   setperiod(20 * Number(e.target.value));
+  //   // switch (e.target.value.toString()) {
+  //   //   case "1h":
+  //   //     setperiod(20);
+  //   //     break;
+  //   //   case "4h":
+  //   //     setperiod(80);
+  //   //     break;
+  //   //   case "1d":
+  //   //     setperiod(480);
+  //   //     break;
+  //   //   case "15m":
+  //   //     setperiod(4);
 
-    //     break;
-    //   case "5m":
-    //     setperiod(1);
-    //     break;
-    //   case "8h":
-    //     setperiod(160);
-    //     break;
-    //   case "12h":
-    //     setperiod(240);
-    //     break;
-    // }
-  };
+  //   //     break;
+  //   //   case "5m":
+  //   //     setperiod(1);
+  //   //     break;
+  //   //   case "8h":
+  //   //     setperiod(160);
+  //   //     break;
+  //   //   case "12h":
+  //   //     setperiod(240);
+  //   //     break;
+  //   // }
+  // };
   function setSortState(sortbydata: string) {
     let temp = [...sort];
     let index = temp.findIndex((item) => item.sortby == sortbydata);
@@ -376,7 +390,7 @@ function CurrentStatus() {
         {!weekly && (
           <Box sx={{ minWidth: 120 }}>
             <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Interval</InputLabel>
+              {/* <InputLabel id="demo-simple-select-label">Interval</InputLabel>
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
@@ -392,7 +406,7 @@ function CurrentStatus() {
                 <MenuItem value={2}>2h</MenuItem>
                 <MenuItem value={1}>1h</MenuItem>
                 <MenuItem value={0.25}>15m</MenuItem>
-              </Select>
+              </Select> */}
               {/* <Input
                 defaultValue={1}
                 onBlur={(e) => {
@@ -432,7 +446,7 @@ function CurrentStatus() {
                 {" "}
                 <Button variant={"contained"}>DailyBinance %</Button>
               </TableCell>
-              <TableCell
+              {/* <TableCell
                 align="center"
                 onClick={() => {
                   setSortState("price");
@@ -455,16 +469,17 @@ function CurrentStatus() {
                 }}
               >
                 <Button variant={"contained"}>Low</Button>
-              </TableCell>
+              </TableCell> */}
               <TableCell
                 align="center"
                 onClick={() => {
                   setSortState("volume");
                 }}
               >
-                <Button variant={"contained"}>15mVolMA</Button>
+                <Button variant={"contained"}>1hVolMA</Button>
               </TableCell>
-              <TableCell align="center">1hVolMA</TableCell>
+              <TableCell align="center">4hVolMA</TableCell>
+              <TableCell align="center">1DVolMA</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -497,23 +512,28 @@ function CurrentStatus() {
                   </TableCell>
                   <TableCell align="center">{item.dailyIndex}</TableCell>
                   <TableCell align="center">{item.dailypercent} %</TableCell>
-                  <TableCell align="center">{item.pchange} %</TableCell>
-                  <TableCell align="center">{item.high} %</TableCell>
-                  <TableCell align="center">{item.low} %</TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant={"contained"}
-                      color={item.vma15m == "Yes" ? "success" : "error"}
-                    >
-                      {item.vma15m}
-                    </Button>
-                  </TableCell>
                   <TableCell align="center">
                     <Button
                       variant={"contained"}
                       color={item.vma1h == "Yes" ? "success" : "error"}
                     >
                       {item.vma1h}
+                    </Button>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant={"contained"}
+                      color={item.vma4h == "Yes" ? "success" : "error"}
+                    >
+                      {item.vma4h}
+                    </Button>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant={"contained"}
+                      color={item.vma1d == "Yes" ? "success" : "error"}
+                    >
+                      {item.vma1d}
                     </Button>
                   </TableCell>
                 </TableRow>

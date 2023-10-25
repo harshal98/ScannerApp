@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import useTimer from "./useTimer";
 
 function useKlineData(
-  period: string = "3m",
+  period: string = "1h",
   limit = 1000
 ): [
   list: {
