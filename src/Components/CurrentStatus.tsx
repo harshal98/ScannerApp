@@ -23,14 +23,15 @@ import { get24hr } from "./GetData";
 type Change = {
   pair: string;
   pchange: number;
-  vchange: number;
   high: number;
   low: number;
   dailypercent?: number;
   PercentStatusb424hr: "Bullish" | "Bearish";
   dailyIndex?: number;
-  v4h: number;
-  v1h: number;
+  vma15m: "Yes" | "No";
+  vma1h: "Yes" | "No";
+  vma4h: "Yes" | "No";
+  vma1d: "Yes" | "No";
 };
 function CurrentStatus() {
   const [data, timer] = useKlineData();
@@ -131,18 +132,60 @@ function CurrentStatus() {
 
         if (item.data[0].c > high46h * 0.99) PercentStatusb424hr = "Bullish";
 
+        let vma15m: "Yes" | "No" = "No";
+        let vma1h: "Yes" | "No" = "No";
+        let vma4h: "Yes" | "No" = "No";
+        let vma1d: "Yes" | "No" = "No";
+
+        let sum15v = 0;
+        for (let i = 0; i < 25 * 5; i++) {
+          sum15v = sum15v + Number(item.data[i].v);
+        }
+        let last15mv = 0;
+        for (let i = 0; i < 5; i++) {
+          last15mv = last15mv + Number(item.data[i].v);
+        }
+        vma15m = sum15v / 25 < last15mv ? "Yes" : "No";
+        console.log(item.pair, sum15v / 25, last15mv, "15m");
+
+        let sum1hv = 0;
+
+        for (let i = 0; i < 25 * 20; i++) {
+          sum1hv = sum1hv + Number(item.data[i].v);
+        }
+        let last1hv = 0;
+        for (let i = 0; i < 20; i++) {
+          last1hv = last1hv + Number(item.data[i].v);
+        }
+        vma1h = sum1hv / 25 < last1hv ? "Yes" : "No";
+        console.log(item.pair, sum1hv / 25, last1hv, "1h");
+        // let sum4hv = 0;
+        // console.log(item.pair, item.data);
+
+        // for (let i = 0; i < 20 * 20 * 4; i++) {
+        //   sum4hv = sum4hv + item.data[i].v;
+        // }
+        // vma4h = sum4hv / 20 < item.data[0].v ? "Yes" : "No";
+
+        // let sum1dv = 0;
+        // for (let i = 0; i < 20 * 20 * 4 * 6; i++) {
+        //   sum1dv = sum1dv + item.data[i].v;
+        // }
+        // vma1d = sum1dv / 20 < item.data[0].v ? "Yes" : "No";
+
         return {
           pair: item.pair,
           pchange,
           high: Number(((high / item.data[p].c) * 100 - 100).toFixed(1)),
           low: Number(((low / item.data[p].c) * 100 - 100).toFixed(1)),
-          vchange: Number(((v0 / v1) * 100).toFixed(2)),
           dailypercent: dailydata.filter(
             (item24) => item24.pair == item.pair
           )[0].priceChangePercent,
           PercentStatusb424hr,
-          v4h: Number(((v4h0 / v4h1) * 100).toFixed(2)),
-          v1h: Number(((v1h0 / v1h1) * 100).toFixed(2)),
+          vma15m,
+          vma1h,
+          vma4h,
+          vma1d,
         };
       });
       //console.log(temparray);
@@ -174,19 +217,6 @@ function CurrentStatus() {
       }
     }
 
-    if (sort.sortby == "volume") {
-      if (sort.asc == true) {
-        sorted = unsorted.sort((i, j) => {
-          if (i.vchange > j.vchange) return -1;
-          else return 1;
-        });
-      } else {
-        sorted = unsorted.sort((i, j) => {
-          if (i.vchange < j.vchange) return -1;
-          else return 1;
-        });
-      }
-    }
     if (sort.sortby == "daily") {
       if (sort.asc == true) {
         sorted = unsorted.sort((i, j) => {
@@ -242,6 +272,19 @@ function CurrentStatus() {
       } else {
         sorted = unsorted.sort((i, j) => {
           if (i.PercentStatusb424hr < j.PercentStatusb424hr) return -1;
+          else return 1;
+        });
+      }
+    }
+    if (sort.sortby == "volume") {
+      if (sort.asc == true) {
+        sorted = unsorted.sort((i, j) => {
+          if (i.vma15m > j.vma15m) return -1;
+          else return 1;
+        });
+      } else {
+        sorted = unsorted.sort((i, j) => {
+          if (i.vma15m < j.vma15m) return -1;
           else return 1;
         });
       }
@@ -419,10 +462,9 @@ function CurrentStatus() {
                   setSortState("volume");
                 }}
               >
-                <Button variant={"contained"}>VolumneChange</Button>
+                <Button variant={"contained"}>15mVolMA</Button>
               </TableCell>
-              <TableCell align="center">Volumne 4h Change</TableCell>
-              <TableCell align="center">Volumne 1h Change</TableCell>
+              <TableCell align="center">1hVolMA</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -458,22 +500,20 @@ function CurrentStatus() {
                   <TableCell align="center">{item.pchange} %</TableCell>
                   <TableCell align="center">{item.high} %</TableCell>
                   <TableCell align="center">{item.low} %</TableCell>
-
-                  <TableCell align="center">{item.vchange} %</TableCell>
                   <TableCell align="center">
                     <Button
                       variant={"contained"}
-                      color={item.v4h > 150 ? "success" : "error"}
+                      color={item.vma15m == "Yes" ? "success" : "error"}
                     >
-                      {item.v4h} %
+                      {item.vma15m}
                     </Button>
                   </TableCell>
                   <TableCell align="center">
                     <Button
                       variant={"contained"}
-                      color={item.v1h > 150 ? "success" : "error"}
+                      color={item.vma1h == "Yes" ? "success" : "error"}
                     >
-                      {item.v1h} %
+                      {item.vma1h}
                     </Button>
                   </TableCell>
                 </TableRow>
