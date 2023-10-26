@@ -2,28 +2,44 @@ import axios, { AxiosResponse } from "axios";
 import FuturePairs from "../Components/FuturePairs";
 import { useEffect, useRef, useState } from "react";
 import useTimer from "./useTimer";
-
-function useKlineData(
-  period: string = "1h",
-  limit = 1000
-): [
-  list: {
+export type KlineData = {
+  timeframe: "5m" | "15m" | "1h" | "4h" | "1d";
+  kline: {
     pair: string;
     data: { o: number; h: number; l: number; c: number; v: number }[];
-  }[],
-  timer: number
-] {
+
+    // data5m: {
+    //   time: "5m";
+    //   data: { o: number; h: number; l: number; c: number; v: number }[];
+    // };
+    // data15m: {
+    //   time: "15m";
+    //   data: { o: number; h: number; l: number; c: number; v: number }[];
+    // };
+    // data1h: {
+    //   time: "1h";
+    //   data: { o: number; h: number; l: number; c: number; v: number }[];
+    // };
+    // data4h: {
+    //   time: "4h";
+    //   data: { o: number; h: number; l: number; c: number; v: number }[];
+    // };
+    // data1d: {
+    //   time: "1d";
+    //   data: { o: number; h: number; l: number; c: number; v: number }[];
+    //};
+  }[];
+};
+function useKlineData(/*limit = 1000*/): [list: KlineData[], timer: number] {
   {
     const clearTimer = useRef(0);
     const [timer, setTimer] = useTimer(30);
-    const [list, setlist] = useState<
-      {
-        pair: string;
-        data: { o: number; h: number; l: number; c: number; v: number }[];
-      }[]
-    >([]);
+    const [list, setlist] = useState<KlineData[]>([]);
 
-    function getData() {
+    function getData(
+      period: "5m" | "15m" | "1h" | "4h" | "1d",
+      limit: number = 25
+    ) {
       let responses: Promise<AxiosResponse>[] = [];
       for (let x of FuturePairs) {
         responses.push(
@@ -34,7 +50,7 @@ function useKlineData(
       }
 
       let allList: any[] = [];
-      axios.all(responses).then((responses) => {
+      return axios.all(responses).then((responses) => {
         responses.forEach((response: AxiosResponse) => {
           let ohlcList: {
             o: number;
@@ -44,13 +60,14 @@ function useKlineData(
             v: number;
           }[] = response.data.map((item: any) => {
             return {
-              o: item[1],
-              h: item[2],
-              l: item[3],
-              c: item[4],
-              v: item[5],
+              o: Number(item[1]),
+              h: Number(item[2]),
+              l: Number(item[3]),
+              c: Number(item[4]),
+              v: Number(item[5]),
             };
           });
+
           //volarray = volarray
           //console.log(volarray.slice(0,6).reduce((accumulator, currentValue) =>accumulator + currentValue ));
 
@@ -69,20 +86,35 @@ function useKlineData(
           else return 1;
           return 0;
         });
-        setlist(allList);
+        return { timeframe: period, kline: allList };
+        //setlist(allList);
       });
-      setTimer();
+
+      //setTimer();
     }
     useEffect(() => {
-      getData();
+      getAllTimeFrameData();
       clearTimer.current = setInterval(() => {
-        getData();
+        getAllTimeFrameData();
       }, 30000);
       return () => {
         clearInterval(clearTimer.current);
       };
-    }, [period]);
+    }, []);
 
+    function getAllTimeFrameData() {
+      let Parray = [];
+      Parray.push(getData("5m", 300));
+      Parray.push(getData("15m"));
+      Parray.push(getData("1h"));
+      Parray.push(getData("4h"));
+      Parray.push(getData("1d"));
+      axios.all(Parray).then((responses) => {
+        //console.log(responses);
+        setlist(responses);
+      });
+      setTimer();
+    }
     return [list, timer];
   }
 }

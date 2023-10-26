@@ -1,17 +1,6 @@
 import { useEffect, useState } from "react";
 import useKlineData from "../hooks/useKlineData";
-import {
-  Stack,
-  Button,
-  //Select,
-  Box,
-  FormControl,
-  //InputLabel,
-  //MenuItem,
-  //SelectChangeEvent,
-  Link,
-  //Input,
-} from "@mui/material";
+import { Stack, Button, Box, FormControl, Link } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -20,186 +9,135 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { get24hr } from "./GetData";
+import { KlineData } from "../hooks/useKlineData";
+import FuturePairs from "./FuturePairs";
 type Change = {
   pair: string;
   dailypercent?: number;
   PercentStatusb424hr: "Bullish" | "Bearish";
   dailyIndex?: number;
+  vma5m: "Yes" | "No";
+  vma15m: "Yes" | "No";
   vma1h: "Yes" | "No";
   vma4h: "Yes" | "No";
   vma1d: "Yes" | "No";
 };
 function CurrentStatus() {
   const [data, timer] = useKlineData();
-  // let weeklydata: {
-  //   pair: string;
-  //   data: {
-  //     o: number;
-  //     h: number;
-  //     l: number;
-  //     c: number;
-  //     v: number;
-  //   }[];
-  // }[] = [];
+
   const [sort, setsort] = useState<{ sortby: string; asc: boolean }[]>([
     {
       sortby: "daily",
       asc: true,
     },
   ]);
-  //const [period, setperiod] = useState(19);
+
   const [changeinpercent, setchangeinpercent] = useState<Change[]>([]);
   const [weekly /*setweekly*/] = useState(false);
-  // if (weekly) {
-  //   [weeklydata] = useKlineData("1h");
-  // }
-  function generateChange(
-    data: {
-      pair: string;
-      data: {
-        o: number;
-        h: number;
-        l: number;
-        c: number;
-        v: number;
-      }[];
-    }[]
-    //weekly: boolean = false
-  ) {
+
+  function generateChange(data: KlineData[]) {
     let temparray: Change[] = [];
 
-    //let p = period;
-
-    //if (weekly == true) p = 167;
     get24hr().then((dailydata) => {
       //console.log(data);
 
-      temparray = data.map((item) => {
-        // let pchange = Number(
-        //   ((item.data[0].c / item.data[p].c) * 100 - 100).toFixed(1)
-        // );
-
-        // let high = 0;
-
-        // item.data.slice(0, p + 1).forEach((item) => {
-        //   if (high < item.h) high = Number(item.h);
-        // });
-        // //console.log(item.pair, high, item.data);
-
-        // let low = 99999999999;
-
-        // item.data.slice(0, p + 1).forEach((item) => {
-        //   if (low > item.l) low = Number(item.l);
-        // });
-
-        // let v0 = 0;
-        // item.data.slice(0, p + 1).forEach((item) => {
-        //   v0 = v0 + Number(item.v);
-        // });
-        // let v1 = 0;
-        // item.data.slice(p + 1, p + 1 + p + 1).forEach((item) => {
-        //   v1 = v1 + Number(item.v);
-        // });
-
-        // let v4h0 = 0;
-        // item.data.slice(0, 20 * 4 + 1).forEach((item) => {
-        //   v4h0 = v4h0 + Number(item.v);
-        // });
-        // let v4h1 = 0;
-        // item.data.slice(20 * 4 + 1, 20 * 4 + 1 + 20 * 4 + 1).forEach((item) => {
-        //   v4h1 = v4h1 + Number(item.v);
-        // });
-
-        // let v1h0 = 0;
-        // item.data.slice(0, 20 + 1).forEach((item) => {
-        //   v1h0 = v1h0 + Number(item.v);
-        // });
-        // let v1h1 = 0;
-        // item.data.slice(20 + 1, 20 + 1 + 20 + 1).forEach((item) => {
-        //   v1h1 = v1h1 + Number(item.v);
-        // });
-
+      temparray = FuturePairs.map((item) => {
         let PercentStatusb424hr: "Bullish" | "Bearish" = "Bearish";
         let high46h = 0;
+        let klinedata = data
+          .filter((item) => item.timeframe == "5m")[0]
+          .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        item.data.slice(360, 480).forEach((item) => {
+        let sum5mv = 0;
+        let vma5m: "Yes" | "No" = "No";
+        for (let i = 0; i < 25; i++) {
+          sum5mv = sum5mv + Number(klinedata[i].v);
+        }
+
+        let last5mcandleV = klinedata[0].v;
+
+        vma5m = sum5mv / 25 < last5mcandleV ? "Yes" : "No";
+
+        klinedata.slice(215, 287).forEach((item) => {
           if (high46h < item.h) high46h = item.h;
         });
 
-        if (item.data[0].c > high46h * 0.99) PercentStatusb424hr = "Bullish";
+        if (klinedata[0].c > high46h * 0.99) PercentStatusb424hr = "Bullish";
 
         let vma15m: "Yes" | "No" = "No";
+        let sum15mv = 0;
+
+        klinedata = data
+          .filter((item) => item.timeframe == "15m")[0]
+          .kline.filter((klineitem) => klineitem.pair == item)[0].data;
+
+        for (let i = 0; i < 25; i++) {
+          sum15mv = sum15mv + Number(klinedata[i].v);
+        }
+
+        let last15mcandleV = klinedata[0].v;
+
+        vma15m = sum15mv / 25 < last15mcandleV ? "Yes" : "No";
+
         let vma1h: "Yes" | "No" = "No";
         let vma4h: "Yes" | "No" = "No";
         let vma1d: "Yes" | "No" = "No";
 
+        klinedata = data
+          .filter((item) => item.timeframe == "1h")[0]
+          .kline.filter((klineitem) => klineitem.pair == item)[0].data;
+
         let sum1hv = 0;
 
         for (let i = 0; i < 25; i++) {
-          sum1hv = sum1hv + Number(item.data[i].v);
+          sum1hv = sum1hv + Number(klinedata[i].v);
         }
 
-        let last6klineHighVol = item.data[0].v;
-        // for (let i = 0; i < 6; i++) {
-        //   if (last6klineHighVol < Number(item.data[i].v))
-        //     last6klineHighVol = Number(item.data[i].v);
-        // }
-        vma1h = sum1hv / 25 < last6klineHighVol ? "Yes" : "No";
-        //console.log(item.pair, sum1hv / 25, last6klineHighVol, "1h");
+        let last1hcandleV = klinedata[0].v;
+
+        vma1h = sum1hv / 25 < last1hcandleV ? "Yes" : "No";
+
+        //console.log(sum1hv / 25, klinedata, item);
+
+        klinedata = data
+          .filter((item) => item.timeframe == "4h")[0]
+          .kline.filter((klineitem) => klineitem.pair == item)[0].data;
+
         let sum4hv = 0;
 
         for (let i = 0; i < 25; i++) {
-          sum4hv = sum4hv + Number(item.data[i].v);
+          sum4hv = sum4hv + Number(klinedata[i].v);
         }
 
-        let last4hVol = 0;
-
-        for (let i = 0; i < 4; i++) {
-          last4hVol = last4hVol + Number(item.data[i].v);
-        }
+        let last4hVol = klinedata[0].v;
         vma4h = sum4hv / 25 < last4hVol ? "Yes" : "No";
-        //console.log(item.pair, sum4hv / 25, last6klineHighVol, "1h");
 
         let sum1dv = 0;
 
-        for (let i = 0; i < 24 * 25; i++) {
-          sum1dv = sum1dv + Number(item.data[i].v);
+        klinedata = data
+          .filter((item) => item.timeframe == "1d")[0]
+          .kline.filter((klineitem) => klineitem.pair == item)[0].data;
+
+        for (let i = 0; i < 25; i++) {
+          sum1dv = sum1dv + Number(klinedata[i].v);
         }
 
-        let lastcandelvol = 0;
+        let lastcandelvol = klinedata[0].v;
 
-        for (let i = 0; i < 24; i++) {
-          lastcandelvol = lastcandelvol + Number(item.data[i].v);
-        }
         vma1d = sum1dv / 25 < lastcandelvol ? "Yes" : "No";
-        console.log(item.pair, sum1dv / 25, lastcandelvol, "1D");
-        // let sum4hv = 0;
-        // console.log(item.pair, item.data);
-
-        // for (let i = 0; i < 20 * 20 * 4; i++) {
-        //   sum4hv = sum4hv + item.data[i].v;
-        // }
-        // vma4h = sum4hv / 20 < item.data[0].v ? "Yes" : "No";
-
-        // let sum1dv = 0;
-        // for (let i = 0; i < 20 * 20 * 4 * 6; i++) {
-        //   sum1dv = sum1dv + item.data[i].v;
-        // }
-        // vma1d = sum1dv / 20 < item.data[0].v ? "Yes" : "No";
+        //console.log(item.pair, sum1dv / 25, lastcandelvol, "1D");
 
         return {
-          pair: item.pair,
-          // pchange,
-          //high: Number(((high / item.data[p].c) * 100 - 100).toFixed(1)),
-          //low: Number(((low / item.data[p].c) * 100 - 100).toFixed(1)),
-          dailypercent: dailydata.filter(
-            (item24) => item24.pair == item.pair
-          )[0].priceChangePercent,
+          pair: item,
+
+          dailypercent: dailydata.filter((item24) => item24.pair == item)[0]
+            .priceChangePercent,
           PercentStatusb424hr,
           vma15m,
           vma1h,
           vma4h,
           vma1d,
+          vma5m,
         };
       });
       //console.log(temparray);
@@ -290,7 +228,7 @@ function CurrentStatus() {
         });
       }
     }
-    if (sort.sortby == "volume") {
+    if (sort.sortby == "v1h") {
       if (sort.asc == true) {
         sorted = unsorted.sort((i, j) => {
           if (i.vma1h > j.vma1h) return -1;
@@ -299,6 +237,32 @@ function CurrentStatus() {
       } else {
         sorted = unsorted.sort((i, j) => {
           if (i.vma1h < j.vma1h) return -1;
+          else return 1;
+        });
+      }
+    }
+    if (sort.sortby == "v5m") {
+      if (sort.asc == true) {
+        sorted = unsorted.sort((i, j) => {
+          if (i.vma5m > j.vma5m) return -1;
+          else return 1;
+        });
+      } else {
+        sorted = unsorted.sort((i, j) => {
+          if (i.vma5m < j.vma5m) return -1;
+          else return 1;
+        });
+      }
+    }
+    if (sort.sortby == "v15m") {
+      if (sort.asc == true) {
+        sorted = unsorted.sort((i, j) => {
+          if (i.vma15m > j.vma15m) return -1;
+          else return 1;
+        });
+      } else {
+        sorted = unsorted.sort((i, j) => {
+          if (i.vma15m < j.vma15m) return -1;
           else return 1;
         });
       }
@@ -473,7 +437,23 @@ function CurrentStatus() {
               <TableCell
                 align="center"
                 onClick={() => {
-                  setSortState("volume");
+                  setSortState("v5m");
+                }}
+              >
+                <Button variant={"contained"}>5mVolMA</Button>
+              </TableCell>
+              <TableCell
+                align="center"
+                onClick={() => {
+                  setSortState("v15m");
+                }}
+              >
+                <Button variant={"contained"}>15mVolMA</Button>
+              </TableCell>
+              <TableCell
+                align="center"
+                onClick={() => {
+                  setSortState("v1h");
                 }}
               >
                 <Button variant={"contained"}>1hVolMA</Button>
@@ -512,6 +492,22 @@ function CurrentStatus() {
                   </TableCell>
                   <TableCell align="center">{item.dailyIndex}</TableCell>
                   <TableCell align="center">{item.dailypercent} %</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant={"contained"}
+                      color={item.vma5m == "Yes" ? "success" : "error"}
+                    >
+                      {item.vma5m}
+                    </Button>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant={"contained"}
+                      color={item.vma15m == "Yes" ? "success" : "error"}
+                    >
+                      {item.vma15m}
+                    </Button>
+                  </TableCell>
                   <TableCell align="center">
                     <Button
                       variant={"contained"}
