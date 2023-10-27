@@ -27,7 +27,19 @@ function CurrentStatus() {
 
   const [sort, setsort] = useState<{ sortby: string; asc: boolean }[]>([
     {
-      sortby: "daily",
+      sortby: "v1h",
+      asc: true,
+    },
+    {
+      sortby: "v15m",
+      asc: true,
+    },
+    {
+      sortby: "v5m",
+      asc: true,
+    },
+    {
+      sortby: "StatusB4",
       asc: true,
     },
   ]);
@@ -102,6 +114,9 @@ function CurrentStatus() {
         }
 
         let last1hcandleV = klinedata[0].v;
+        klinedata.slice(1, 5).forEach((item) => {
+          if (item.v > last1hcandleV) last1hcandleV = item.v;
+        });
 
         vma1h = sum1hv / 25 < last1hcandleV ? "Yes" : "No";
 
