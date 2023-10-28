@@ -16,6 +16,7 @@ type Change = {
   dailypercent?: number;
   PercentStatusb424hr: "Bullish" | "Bearish";
   dailyIndex?: number;
+  green15m: "Yes" | "No";
   vma5m: "Yes" | "No";
   vma15m: "Yes" | "No";
   vma1h: "Yes" | "No";
@@ -92,6 +93,9 @@ function CurrentStatus() {
         }
 
         let last15mcandleV = klinedata[0].v;
+
+        let green15m: "Yes" | "No" =
+          klinedata[0].c > klinedata[0].o ? "Yes" : "No";
         // klinedata.slice(1, 5).forEach((item) => {
         //   if (item.v > last15mcandleV) last15mcandleV = item.v;
         // });
@@ -151,10 +155,14 @@ function CurrentStatus() {
 
         vma1d = sum1dv / 25 < lastcandelvol ? "Yes" : "No";
         //console.log(item.pair, sum1dv / 25, lastcandelvol, "1D");
-
+        let sortedDaily = dailydata.sort((i, j) => {
+          if (i.priceChangePercent > j.priceChangePercent) return -1;
+          else if (i.priceChangePercent < j.priceChangePercent) return 1;
+          return 0;
+        });
         return {
           pair: item,
-
+          dailyIndex: sortedDaily.findIndex((find) => find.pair == item) + 1,
           dailypercent: dailydata.filter((item24) => item24.pair == item)[0]
             .priceChangePercent,
           PercentStatusb424hr,
@@ -163,6 +171,7 @@ function CurrentStatus() {
           vma4h,
           vma1d,
           vma5m,
+          green15m,
         };
       });
       //console.log(temparray);
@@ -435,6 +444,8 @@ function CurrentStatus() {
                 {" "}
                 <Button variant={"contained"}>DailyBinance %</Button>
               </TableCell>
+              <TableCell align="center">15m Green</TableCell>
+
               {/* <TableCell
                 align="center"
                 onClick={() => {
@@ -517,6 +528,14 @@ function CurrentStatus() {
                   </TableCell>
                   <TableCell align="center">{item.dailyIndex}</TableCell>
                   <TableCell align="center">{item.dailypercent} %</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant={"contained"}
+                      color={item.green15m == "Yes" ? "success" : "error"}
+                    >
+                      {item.green15m}
+                    </Button>
+                  </TableCell>
                   <TableCell align="center">
                     <Button
                       variant={"contained"}
