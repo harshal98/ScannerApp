@@ -68,9 +68,9 @@ function CurrentStatus() {
         }
 
         let last5mcandleV = klinedata[0].v;
-        klinedata.slice(1, 5).forEach((item) => {
-          if (item.v > last5mcandleV) last5mcandleV = item.v;
-        });
+        // klinedata.slice(1, 5).forEach((item) => {
+        //   if (item.v > last5mcandleV) last5mcandleV = item.v;
+        // });
         vma5m = sum5mv / 25 < last5mcandleV ? "Yes" : "No";
 
         klinedata.slice(215, 287).forEach((item) => {
@@ -92,9 +92,9 @@ function CurrentStatus() {
         }
 
         let last15mcandleV = klinedata[0].v;
-        klinedata.slice(1, 5).forEach((item) => {
-          if (item.v > last15mcandleV) last15mcandleV = item.v;
-        });
+        // klinedata.slice(1, 5).forEach((item) => {
+        //   if (item.v > last15mcandleV) last15mcandleV = item.v;
+        // });
 
         vma15m = sum15mv / 25 < last15mcandleV ? "Yes" : "No";
 
