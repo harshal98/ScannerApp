@@ -43,6 +43,10 @@ function CurrentStatus() {
       sortby: "StatusB4",
       asc: true,
     },
+    {
+      sortby: "15green",
+      asc: true,
+    },
   ]);
 
   const [changeinpercent, setchangeinpercent] = useState<Change[]>([]);
@@ -301,6 +305,20 @@ function CurrentStatus() {
         });
       }
     }
+
+    if (sort.sortby == "15green") {
+      if (sort.asc == true) {
+        sorted = unsorted.sort((i, j) => {
+          if (i.green15m > j.green15m) return -1;
+          else return 1;
+        });
+      } else {
+        sorted = unsorted.sort((i, j) => {
+          if (i.green15m < j.green15m) return -1;
+          else return 1;
+        });
+      }
+    }
     return sorted;
   }
   useEffect(() => {
@@ -500,84 +518,85 @@ function CurrentStatus() {
           </TableHead>
           <TableBody>
             {changeinpercent.map((item, index) => {
-              return (
-                <TableRow key={item.pair}>
-                  <TableCell align="center">{index + 1}</TableCell>
-                  <TableCell align="center">
-                    {
-                      <Link
-                        href={`https://www.tradingview.com/chart/V7sMPZg2/?symbol=BINANCE:${item.pair}`}
-                        target="_blank"
-                        underline="hover"
-                      >
-                        {item.pair}
-                      </Link>
-                    }
-                  </TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant={"contained"}
-                      color={
-                        item.PercentStatusb424hr == "Bullish"
-                          ? "success"
-                          : "error"
+              if (item.PercentStatusb424hr == "Bullish")
+                return (
+                  <TableRow key={item.pair}>
+                    <TableCell align="center">{index + 1}</TableCell>
+                    <TableCell align="center">
+                      {
+                        <Link
+                          href={`https://www.tradingview.com/chart/V7sMPZg2/?symbol=BINANCE:${item.pair}`}
+                          target="_blank"
+                          underline="hover"
+                        >
+                          {item.pair}
+                        </Link>
                       }
-                    >
-                      {item.PercentStatusb424hr}
-                    </Button>
-                  </TableCell>
-                  <TableCell align="center">{item.dailyIndex}</TableCell>
-                  <TableCell align="center">{item.dailypercent} %</TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant={"contained"}
-                      color={item.green15m == "Yes" ? "success" : "error"}
-                    >
-                      {item.green15m}
-                    </Button>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant={"contained"}
-                      color={item.vma5m == "Yes" ? "success" : "error"}
-                    >
-                      {item.vma5m}
-                    </Button>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant={"contained"}
-                      color={item.vma15m == "Yes" ? "success" : "error"}
-                    >
-                      {item.vma15m}
-                    </Button>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant={"contained"}
-                      color={item.vma1h == "Yes" ? "success" : "error"}
-                    >
-                      {item.vma1h}
-                    </Button>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant={"contained"}
-                      color={item.vma4h == "Yes" ? "success" : "error"}
-                    >
-                      {item.vma4h}
-                    </Button>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant={"contained"}
-                      color={item.vma1d == "Yes" ? "success" : "error"}
-                    >
-                      {item.vma1d}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={
+                          item.PercentStatusb424hr == "Bullish"
+                            ? "success"
+                            : "error"
+                        }
+                      >
+                        {item.PercentStatusb424hr}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">{item.dailyIndex}</TableCell>
+                    <TableCell align="center">{item.dailypercent} %</TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.green15m == "Yes" ? "success" : "error"}
+                      >
+                        {item.green15m}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.vma5m == "Yes" ? "success" : "error"}
+                      >
+                        {item.vma5m}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.vma15m == "Yes" ? "success" : "error"}
+                      >
+                        {item.vma15m}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.vma1h == "Yes" ? "success" : "error"}
+                      >
+                        {item.vma1h}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.vma4h == "Yes" ? "success" : "error"}
+                      >
+                        {item.vma4h}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.vma1d == "Yes" ? "success" : "error"}
+                      >
+                        {item.vma1d}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
             })}
           </TableBody>
         </Table>
