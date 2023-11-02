@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import useKlineData from "../hooks/useKlineData";
-import { Stack, Button, Box, FormControl, Link } from "@mui/material";
+import { Stack, Button, Link } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -49,8 +49,10 @@ function CurrentStatus() {
     },
   ]);
 
+  let indexdisplay = 0;
+
   const [changeinpercent, setchangeinpercent] = useState<Change[]>([]);
-  const [weekly /*setweekly*/] = useState(false);
+  //const [weekly /*setweekly*/] = useState(false);
 
   function generateChange(data: KlineData[]) {
     let temparray: Change[] = [];
@@ -100,9 +102,9 @@ function CurrentStatus() {
 
         let green15m: "Yes" | "No" =
           klinedata[0].c > klinedata[0].o ? "Yes" : "No";
-        // klinedata.slice(1, 5).forEach((item) => {
-        //   if (item.v > last15mcandleV) last15mcandleV = item.v;
-        // });
+        klinedata.slice(1, 5).forEach((item) => {
+          if (item.v > last15mcandleV) last15mcandleV = item.v;
+        });
 
         vma15m = sum15mv / 25 < last15mcandleV ? "Yes" : "No";
 
@@ -332,12 +334,12 @@ function CurrentStatus() {
   }, [sort]);
   //UseEffect for daily percentagechane
   useEffect(() => {
-    if (data.length != 0 && weekly == false) {
+    if (data.length != 0) {
       generateChange(data);
     } else {
       //console.log("data.lenth is zero");
     }
-  }, [data, weekly]);
+  }, [data]);
 
   //UseEffect for Weekly percentagechane
   // useEffect(() => {
@@ -402,41 +404,6 @@ function CurrentStatus() {
 
   return (
     <Stack>
-      <Stack direction={"row"} justifyContent={"center"}>
-        {!weekly && (
-          <Box sx={{ minWidth: 120 }}>
-            <FormControl fullWidth>
-              {/* <InputLabel id="demo-simple-select-label">Interval</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                label="Interval"
-                onChange={handlechange}
-                defaultValue={1}
-              >
-                <MenuItem value={24}>1d</MenuItem>
-                <MenuItem value={12}>12h</MenuItem>
-                <MenuItem value={8}>8h</MenuItem>
-                <MenuItem value={4}>4h</MenuItem>
-                <MenuItem value={3}>3h</MenuItem>
-                <MenuItem value={2}>2h</MenuItem>
-                <MenuItem value={1}>1h</MenuItem>
-                <MenuItem value={0.25}>15m</MenuItem>
-              </Select> */}
-              {/* <Input
-                defaultValue={1}
-                onBlur={(e) => {
-                  handlechange(e);
-                }}
-              ></Input> */}
-            </FormControl>
-          </Box>
-        )}
-
-        {/* <Button variant={"contained"} onClick={() => setweekly(!weekly)}>
-          Weekly Status
-        </Button> */}
-      </Stack>
       <p>{timer}</p>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -464,30 +431,6 @@ function CurrentStatus() {
               </TableCell>
               <TableCell align="center">15m Green</TableCell>
 
-              {/* <TableCell
-                align="center"
-                onClick={() => {
-                  setSortState("price");
-                }}
-              >
-                <Button variant={"contained"}>PriceChange</Button>
-              </TableCell>
-              <TableCell
-                align="center"
-                onClick={() => {
-                  setSortState("high");
-                }}
-              >
-                <Button variant={"contained"}>High</Button>
-              </TableCell>
-              <TableCell
-                align="center"
-                onClick={() => {
-                  setSortState("low");
-                }}
-              >
-                <Button variant={"contained"}>Low</Button>
-              </TableCell> */}
               <TableCell
                 align="center"
                 onClick={() => {
@@ -517,11 +460,15 @@ function CurrentStatus() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {changeinpercent.map((item, index) => {
-              if (item.PercentStatusb424hr == "Bullish")
+            {changeinpercent.map((item) => {
+              if (
+                item.PercentStatusb424hr == "Bullish" && item.dailyIndex != null
+                  ? item.dailyIndex < 50
+                  : false
+              )
                 return (
                   <TableRow key={item.pair}>
-                    <TableCell align="center">{index + 1}</TableCell>
+                    <TableCell align="center">{++indexdisplay}</TableCell>
                     <TableCell align="center">
                       {
                         <Link
