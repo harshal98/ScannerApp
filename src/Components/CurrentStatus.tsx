@@ -151,11 +151,10 @@ function CurrentStatus() {
 
         //1 hour Volume CAlc
 
-        if (filter.v1h != 1) {
-          klinedata = data
-            .filter((item) => item.timeframe == "1h")[0]
-            .kline.filter((klineitem) => klineitem.pair == item)[0].data;
-        }
+        klinedata = data
+          .filter((item) => item.timeframe == "1h")[0]
+          .kline.filter((klineitem) => klineitem.pair == item)[0].data;
+
         let sum1hv = 0;
 
         for (let i = 0; i < 25; i++) {
