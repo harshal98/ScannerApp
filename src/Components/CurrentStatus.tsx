@@ -179,9 +179,11 @@ function CurrentStatus() {
 
         let sum4hv = 0;
 
-        for (let i = 0; i < 25; i++) {
-          sum4hv = sum4hv + Number(klinedata[i].v);
-        }
+        if (klinedata.length >= 25) {
+          for (let i = 0; i < 25; i++) {
+            sum4hv = sum4hv + Number(klinedata[i].v);
+          }
+        } else sum4hv = 9999999;
 
         let last4hVol = klinedata[0].v;
 
@@ -200,10 +202,11 @@ function CurrentStatus() {
           .filter((item) => item.timeframe == "1d")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        for (let i = 0; i < 25; i++) {
-          sum1dv = sum1dv + Number(klinedata[i].v);
-        }
-
+        if (klinedata.length >= 25) {
+          for (let i = 0; i < 25; i++) {
+            sum1dv = sum1dv + Number(klinedata[i].v);
+          }
+        } else sum1dv = 999999;
         let lastcandelvol = klinedata[0].v;
 
         vma1d = sum1dv / 25 < lastcandelvol ? "Yes" : "No";
