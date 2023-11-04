@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import FuturePairs from "../Components/FuturePairs";
 import { useEffect, useRef, useState } from "react";
-import useTimer from "./useTimer";
+//import useTimer from "./useTimer";
 export type KlineData = {
   timeframe: "5m" | "15m" | "1h" | "4h" | "1d";
   kline: {
@@ -30,10 +30,10 @@ export type KlineData = {
     //};
   }[];
 };
-function useKlineData(/*limit = 1000*/): [list: KlineData[], timer: number] {
+function useKlineData(/*limit = 1000*/): [list: KlineData[] /*timer: number*/] {
   {
     const clearTimer = useRef(0);
-    const [timer, setTimer] = useTimer(30);
+    //const [timer, setTimer] = useTimer(30);
     const [list, setlist] = useState<KlineData[]>([]);
 
     function getData(
@@ -113,9 +113,9 @@ function useKlineData(/*limit = 1000*/): [list: KlineData[], timer: number] {
         //console.log(responses);
         setlist(responses);
       });
-      setTimer();
+      //setTimer();
     }
-    return [list, timer];
+    return [list /*timer*/];
   }
 }
 

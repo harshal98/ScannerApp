@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import useKlineData from "../hooks/useKlineData";
-import { Stack, Button, Link } from "@mui/material";
+import {
+  Stack,
+  Button,
+  Link,
+  Select,
+  MenuItem,
+  Typography,
+} from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -11,6 +18,9 @@ import Paper from "@mui/material/Paper";
 import { get24hr } from "./GetData";
 import { KlineData } from "../hooks/useKlineData";
 import FuturePairs from "./FuturePairs";
+
+import { useForm } from "react-hook-form";
+
 type Change = {
   pair: string;
   dailypercent?: number;
@@ -23,8 +33,30 @@ type Change = {
   vma4h: "Yes" | "No";
   vma1d: "Yes" | "No";
 };
+
+type Inputs = {
+  bullish: "Bullish" | "Bearish";
+  status24: number;
+  dailyRank: number;
+  v5m: number;
+  v15m: number;
+  v1h: number;
+  v4h: number;
+};
+
 function CurrentStatus() {
-  const [data, timer] = useKlineData();
+  const { register, handleSubmit } = useForm<Inputs>();
+  const [showFilter, setShowFilter] = useState(false);
+  const [filter, setfilter] = useState<Inputs>({
+    bullish: "Bullish",
+    status24: 6,
+    dailyRank: 50,
+    v5m: 1,
+    v15m: 6,
+    v1h: 6,
+    v4h: 6,
+  });
+  const [data /*timer*/] = useKlineData();
 
   const [sort, setsort] = useState<{ sortby: string; asc: boolean }[]>([
     {
@@ -75,12 +107,14 @@ function CurrentStatus() {
         }
 
         let last5mcandleV = klinedata[0].v;
-        // klinedata.slice(1, 5).forEach((item) => {
-        //   if (item.v > last5mcandleV) last5mcandleV = item.v;
-        // });
+        if (filter.v5m != 1) {
+          klinedata.slice(1, 5).forEach((item) => {
+            if (item.v > last5mcandleV) last5mcandleV = item.v;
+          });
+        }
         vma5m = sum5mv / 25 < last5mcandleV ? "Yes" : "No";
 
-        klinedata.slice(215, 287).forEach((item) => {
+        klinedata.slice(287 - 12 * filter.status24, 287).forEach((item) => {
           if (high46h < item.h) high46h = item.h;
         });
 
@@ -102,9 +136,12 @@ function CurrentStatus() {
 
         let green15m: "Yes" | "No" =
           klinedata[0].c > klinedata[0].o ? "Yes" : "No";
-        klinedata.slice(1, 5).forEach((item) => {
-          if (item.v > last15mcandleV) last15mcandleV = item.v;
-        });
+
+        if (filter.v15m != 1) {
+          klinedata.slice(1, 5).forEach((item) => {
+            if (item.v > last15mcandleV) last15mcandleV = item.v;
+          });
+        }
 
         vma15m = sum15mv / 25 < last15mcandleV ? "Yes" : "No";
 
@@ -113,10 +150,12 @@ function CurrentStatus() {
         let vma1d: "Yes" | "No" = "No";
 
         //1 hour Volume CAlc
-        klinedata = data
-          .filter((item) => item.timeframe == "1h")[0]
-          .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
+        if (filter.v1h != 1) {
+          klinedata = data
+            .filter((item) => item.timeframe == "1h")[0]
+            .kline.filter((klineitem) => klineitem.pair == item)[0].data;
+        }
         let sum1hv = 0;
 
         for (let i = 0; i < 25; i++) {
@@ -144,6 +183,13 @@ function CurrentStatus() {
         }
 
         let last4hVol = klinedata[0].v;
+
+        if (filter.v4h != 1) {
+          klinedata.slice(1, 5).forEach((item) => {
+            if (item.v > last4hVol) last4hVol = item.v;
+          });
+        }
+
         vma4h = sum4hv / 25 < last4hVol ? "Yes" : "No";
 
         //1 Day Volume CAlc
@@ -195,19 +241,6 @@ function CurrentStatus() {
     unsorted: Change[]
   ) {
     let sorted: Change[] = [];
-    // if (sort.sortby == "price") {
-    //   if (sort.asc == true) {
-    //     sorted = unsorted.sort((i, j) => {
-    //       if (i.pchange > j.pchange) return -1;
-    //       else return 1;
-    //     });
-    //   } else {
-    //     sorted = unsorted.sort((i, j) => {
-    //       if (i.pchange < j.pchange) return -1;
-    //       else return 1;
-    //     });
-    //   }
-    // }
 
     if (sort.sortby == "daily") {
       if (sort.asc == true) {
@@ -229,32 +262,7 @@ function CurrentStatus() {
         });
       }
     }
-    // if (sort.sortby == "high") {
-    //   if (sort.asc == true) {
-    //     sorted = unsorted.sort((i, j) => {
-    //       if (i.high > j.high) return -1;
-    //       else return 1;
-    //     });
-    //   } else {
-    //     sorted = unsorted.sort((i, j) => {
-    //       if (i.high < j.high) return -1;
-    //       else return 1;
-    //     });
-    //   }
-    // }
-    // if (sort.sortby == "low") {
-    //   if (sort.asc == true) {
-    //     sorted = unsorted.sort((i, j) => {
-    //       if (i.low > j.low) return -1;
-    //       else return 1;
-    //     });
-    //   } else {
-    //     sorted = unsorted.sort((i, j) => {
-    //       if (i.low < j.low) return -1;
-    //       else return 1;
-    //     });
-    //   }
-    // }
+
     if (sort.sortby == "StatusB4") {
       if (sort.asc == true) {
         sorted = unsorted.sort((i, j) => {
@@ -339,47 +347,8 @@ function CurrentStatus() {
     } else {
       //console.log("data.lenth is zero");
     }
-  }, [data]);
+  }, [data, filter]);
 
-  //UseEffect for Weekly percentagechane
-  // useEffect(() => {
-  //   if (weekly != false) {
-  //     if (weeklydata.length != 0) {
-  //       setchangeinpercent(generateChange(weeklydata, weekly));
-  //     } else {
-  //       console.log("data.lenth is zero");
-  //     }
-  //   }
-  // }, [weeklydata, weekly]);
-
-  // const handlechange = (e: SelectChangeEvent<Number>) => {
-  //   //console.log(e.target.value);
-  //   setperiod(20 * Number(e.target.value));
-  //   // switch (e.target.value.toString()) {
-  //   //   case "1h":
-  //   //     setperiod(20);
-  //   //     break;
-  //   //   case "4h":
-  //   //     setperiod(80);
-  //   //     break;
-  //   //   case "1d":
-  //   //     setperiod(480);
-  //   //     break;
-  //   //   case "15m":
-  //   //     setperiod(4);
-
-  //   //     break;
-  //   //   case "5m":
-  //   //     setperiod(1);
-  //   //     break;
-  //   //   case "8h":
-  //   //     setperiod(160);
-  //   //     break;
-  //   //   case "12h":
-  //   //     setperiod(240);
-  //   //     break;
-  //   // }
-  // };
   function setSortState(sortbydata: string) {
     let temp = [...sort];
     let index = temp.findIndex((item) => item.sortby == sortbydata);
@@ -401,154 +370,255 @@ function CurrentStatus() {
     }
     setsort(temp);
   }
-
+  const onSubmit = (data: Inputs) => {
+    setfilter({
+      status24: Number(data.status24),
+      bullish: data.bullish,
+      v15m: Number(data.v15m),
+      v1h: Number(data.v1h),
+      dailyRank: Number(data.dailyRank),
+      v4h: Number(data.v4h),
+      v5m: Number(data.v5m),
+    });
+    console.log(data);
+  };
   return (
-    <Stack>
-      <p>{timer}</p>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">Index</TableCell>
-              <TableCell align="center">Pair</TableCell>
-              <TableCell
-                align="center"
-                onClick={() => {
-                  setSortState("StatusB4");
-                }}
-              >
-                <Button variant={"contained"}>StatusB4[24hr]</Button>
-              </TableCell>
-              <TableCell align="center">DailyIndex</TableCell>
-              <TableCell
-                align="center"
-                onClick={() => {
-                  setSortState("daily");
-                }}
-              >
-                {" "}
-                <Button variant={"contained"}>DailyBinance %</Button>
-              </TableCell>
-              <TableCell align="center">15m Green</TableCell>
+    <>
+      {/* <p>{timer}</p> */}
 
-              <TableCell
-                align="center"
-                onClick={() => {
-                  setSortState("v5m");
-                }}
-              >
-                <Button variant={"contained"}>5mVolMA</Button>
-              </TableCell>
-              <TableCell
-                align="center"
-                onClick={() => {
-                  setSortState("v15m");
-                }}
-              >
-                <Button variant={"contained"}>15mVolMA</Button>
-              </TableCell>
-              <TableCell
-                align="center"
-                onClick={() => {
-                  setSortState("v1h");
-                }}
-              >
-                <Button variant={"contained"}>1hVolMA</Button>
-              </TableCell>
-              <TableCell align="center">4hVolMA</TableCell>
-              <TableCell align="center">1DVolMA</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {changeinpercent.map((item) => {
-              if (
-                item.PercentStatusb424hr == "Bullish" && item.dailyIndex != null
-                  ? item.dailyIndex < 50
-                  : false
-              )
-                return (
-                  <TableRow key={item.pair}>
-                    <TableCell align="center">{++indexdisplay}</TableCell>
-                    <TableCell align="center">
-                      {
-                        <Link
-                          href={`https://www.tradingview.com/chart/V7sMPZg2/?symbol=BINANCE:${item.pair}`}
-                          target="_blank"
-                          underline="hover"
-                        >
-                          {item.pair}
-                        </Link>
-                      }
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={
-                          item.PercentStatusb424hr == "Bullish"
-                            ? "success"
-                            : "error"
+      <Button
+        onClick={() => setShowFilter(!showFilter)}
+        variant={showFilter == true ? "contained" : "outlined"}
+      >
+        {showFilter == true ? "HideFilters" : "Show Filters"}
+      </Button>
+      {showFilter && (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Stack
+            justifyContent={"center"}
+            display={"flex"}
+            spacing={2}
+            direction={"row"}
+            alignItems={"center"}
+          >
+            <Typography>Market Status</Typography>
+            <Select
+              defaultValue={filter.bullish}
+              label="Filter Market"
+              {...register("bullish", { required: true })}
+            >
+              <MenuItem value="Bullish">Bullish</MenuItem>
+              <MenuItem value="Bearish">Bearish</MenuItem>
+            </Select>
+            <Typography>Daily Rank</Typography>
+            <Select
+              defaultValue={filter.dailyRank}
+              {...register("dailyRank", { required: true })}
+            >
+              <MenuItem value="50">50</MenuItem>
+              <MenuItem value="70">70</MenuItem>
+              <MenuItem value="100">100</MenuItem>
+            </Select>
+            <Typography>Statusb4-24</Typography>
+            <Select
+              defaultValue={filter.status24}
+              {...register("status24", { required: true })}
+            >
+              <MenuItem value="6">6</MenuItem>
+              <MenuItem value="4">4</MenuItem>
+              <MenuItem value="2">2</MenuItem>
+            </Select>
+            <Typography>5mVol</Typography>
+            <Select
+              defaultValue={filter.v5m}
+              {...register("v5m", { required: true })}
+            >
+              <MenuItem value="6">6</MenuItem>
+              <MenuItem value="1">1</MenuItem>
+            </Select>
+            <Typography>15mVol</Typography>
+            <Select
+              defaultValue={filter.v15m}
+              {...register("v15m", { required: true })}
+            >
+              <MenuItem value="6">6</MenuItem>
+              <MenuItem value="1">1</MenuItem>
+            </Select>
+            <Typography>1hVol</Typography>
+            <Select
+              defaultValue={filter.v1h}
+              {...register("v1h", { required: true })}
+            >
+              <MenuItem value="6">6</MenuItem>
+              <MenuItem value="1">1</MenuItem>
+            </Select>
+            <Typography>4hVol</Typography>
+            <Select
+              defaultValue={filter.v4h}
+              {...register("v4h", { required: true })}
+            >
+              <MenuItem value="6">6</MenuItem>
+              <MenuItem value="1">1</MenuItem>
+            </Select>
+
+            <Button type="submit" color="primary" variant={"contained"}>
+              Filter
+            </Button>
+          </Stack>
+        </form>
+      )}
+
+      <Stack>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell align="center">Index</TableCell>
+                <TableCell align="center">Pair</TableCell>
+                <TableCell
+                  align="center"
+                  onClick={() => {
+                    setSortState("StatusB4");
+                  }}
+                >
+                  <Button variant={"contained"}>StatusB4[24hr]</Button>
+                </TableCell>
+                <TableCell align="center">DailyIndex</TableCell>
+                <TableCell
+                  align="center"
+                  onClick={() => {
+                    setSortState("daily");
+                  }}
+                >
+                  {" "}
+                  <Button variant={"contained"}>DailyBinance %</Button>
+                </TableCell>
+                <TableCell align="center">15m Green</TableCell>
+
+                <TableCell
+                  align="center"
+                  onClick={() => {
+                    setSortState("v5m");
+                  }}
+                >
+                  <Button variant={"contained"}>5mVolMA</Button>
+                </TableCell>
+                <TableCell
+                  align="center"
+                  onClick={() => {
+                    setSortState("v15m");
+                  }}
+                >
+                  <Button variant={"contained"}>15mVolMA</Button>
+                </TableCell>
+                <TableCell
+                  align="center"
+                  onClick={() => {
+                    setSortState("v1h");
+                  }}
+                >
+                  <Button variant={"contained"}>1hVolMA</Button>
+                </TableCell>
+                <TableCell align="center">4hVolMA</TableCell>
+                <TableCell align="center">1DVolMA</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {changeinpercent.map((item) => {
+                if (item.pair == "BTCUSDT") console.log(filter, "FilterState");
+
+                if (
+                  item.PercentStatusb424hr == filter.bullish &&
+                  item.dailyIndex != null
+                    ? item.dailyIndex < filter.dailyRank
+                    : false
+                )
+                  return (
+                    <TableRow key={item.pair}>
+                      <TableCell align="center">{++indexdisplay}</TableCell>
+                      <TableCell align="center">
+                        {
+                          <Link
+                            href={`https://www.tradingview.com/chart/V7sMPZg2/?symbol=BINANCE:${item.pair}`}
+                            target="_blank"
+                            underline="hover"
+                          >
+                            {item.pair}
+                          </Link>
                         }
-                      >
-                        {item.PercentStatusb424hr}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">{item.dailyIndex}</TableCell>
-                    <TableCell align="center">{item.dailypercent} %</TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.green15m == "Yes" ? "success" : "error"}
-                      >
-                        {item.green15m}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.vma5m == "Yes" ? "success" : "error"}
-                      >
-                        {item.vma5m}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.vma15m == "Yes" ? "success" : "error"}
-                      >
-                        {item.vma15m}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.vma1h == "Yes" ? "success" : "error"}
-                      >
-                        {item.vma1h}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.vma4h == "Yes" ? "success" : "error"}
-                      >
-                        {item.vma4h}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.vma1d == "Yes" ? "success" : "error"}
-                      >
-                        {item.vma1d}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Stack>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={
+                            item.PercentStatusb424hr == "Bullish"
+                              ? "success"
+                              : "error"
+                          }
+                        >
+                          {item.PercentStatusb424hr}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">{item.dailyIndex}</TableCell>
+                      <TableCell align="center">
+                        {item.dailypercent} %
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.green15m == "Yes" ? "success" : "error"}
+                        >
+                          {item.green15m}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.vma5m == "Yes" ? "success" : "error"}
+                        >
+                          {item.vma5m}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.vma15m == "Yes" ? "success" : "error"}
+                        >
+                          {item.vma15m}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.vma1h == "Yes" ? "success" : "error"}
+                        >
+                          {item.vma1h}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.vma4h == "Yes" ? "success" : "error"}
+                        >
+                          {item.vma4h}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.vma1d == "Yes" ? "success" : "error"}
+                        >
+                          {item.vma1d}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Stack>
+    </>
   );
 }
 
