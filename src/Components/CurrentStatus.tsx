@@ -7,6 +7,7 @@ import {
   Select,
   MenuItem,
   Typography,
+  Checkbox,
 } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -42,6 +43,7 @@ type Inputs = {
   v15m: number;
   v1h: number;
   v4h: number;
+  checkMultiple: boolean;
 };
 
 function CurrentStatus() {
@@ -55,6 +57,7 @@ function CurrentStatus() {
     v15m: 6,
     v1h: 6,
     v4h: 6,
+    checkMultiple: true,
   });
   const [data /*timer*/] = useKlineData();
 
@@ -106,14 +109,26 @@ function CurrentStatus() {
           sum5mv = sum5mv + Number(klinedata[i].v);
         }
 
-        let last5mcandleV = klinedata[0].v;
-        if (filter.v5m != 1) {
-          klinedata.slice(1, 5).forEach((item) => {
-            if (item.v > last5mcandleV) last5mcandleV = item.v;
-          });
-        }
-        vma5m = sum5mv / 25 < last5mcandleV ? "Yes" : "No";
+        let v5ma = sum5mv / 25;
 
+        if (filter.checkMultiple) {
+          let count = 0;
+          klinedata.slice(0, 5).forEach((item) => {
+            if (v5ma < item.v) count++;
+          });
+
+          vma5m = count > 1 ? "Yes" : "No";
+        } else {
+          let last5mcandleV = klinedata[0].v;
+          if (filter.v5m != 1) {
+            klinedata.slice(1, 5).forEach((item) => {
+              if (item.v > last5mcandleV) last5mcandleV = item.v;
+            });
+          }
+
+          vma5m = v5ma < last5mcandleV ? "Yes" : "No";
+        }
+        //Calculating last6 hours status
         klinedata.slice(287 - 12 * filter.status24, 287).forEach((item) => {
           if (high46h < item.h) high46h = item.h;
         });
@@ -131,19 +146,27 @@ function CurrentStatus() {
         for (let i = 0; i < 25; i++) {
           sum15mv = sum15mv + Number(klinedata[i].v);
         }
-
-        let last15mcandleV = klinedata[0].v;
-
+        let v15ma = sum15mv / 25;
         let green15m: "Yes" | "No" =
           klinedata[0].c > klinedata[0].o ? "Yes" : "No";
 
-        if (filter.v15m != 1) {
-          klinedata.slice(1, 5).forEach((item) => {
-            if (item.v > last15mcandleV) last15mcandleV = item.v;
+        if (filter.checkMultiple) {
+          let count = 0;
+          klinedata.slice(0, 5).forEach((item) => {
+            if (item.v > v15ma) count++;
           });
-        }
+          vma15m = count > 1 ? "Yes" : "No";
+        } else {
+          let last15mcandleV = klinedata[0].v;
 
-        vma15m = sum15mv / 25 < last15mcandleV ? "Yes" : "No";
+          if (filter.v15m != 1) {
+            klinedata.slice(1, 5).forEach((item) => {
+              if (item.v > last15mcandleV) last15mcandleV = item.v;
+            });
+          }
+
+          vma15m = v15ma < last15mcandleV ? "Yes" : "No";
+        }
 
         let vma1h: "Yes" | "No" = "No";
         let vma4h: "Yes" | "No" = "No";
@@ -375,6 +398,7 @@ function CurrentStatus() {
     setsort(temp);
   }
   const onSubmit = (data: Inputs) => {
+    console.log(data);
     setfilter({
       status24: Number(data.status24),
       bullish: data.bullish,
@@ -383,8 +407,8 @@ function CurrentStatus() {
       dailyRank: Number(data.dailyRank),
       v4h: Number(data.v4h),
       v5m: Number(data.v5m),
+      checkMultiple: data.checkMultiple,
     });
-    console.log(data);
   };
   return (
     <>
@@ -464,7 +488,11 @@ function CurrentStatus() {
               <MenuItem value="6">6</MenuItem>
               <MenuItem value="1">1</MenuItem>
             </Select>
-
+            <Typography>CheckMultipleCandles</Typography>
+            <Checkbox
+              {...register("checkMultiple")}
+              defaultChecked={filter.checkMultiple}
+            />
             <Button type="submit" color="primary" variant={"contained"}>
               Filter
             </Button>
