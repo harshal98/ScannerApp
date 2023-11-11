@@ -147,8 +147,6 @@ function CurrentStatus() {
           sum15mv = sum15mv + Number(klinedata[i].v);
         }
         let v15ma = sum15mv / 25;
-        let green15m: "Yes" | "No" =
-          klinedata[0].c > klinedata[0].o ? "Yes" : "No";
 
         if (filter.checkMultiple) {
           let count = 0;
@@ -183,15 +181,23 @@ function CurrentStatus() {
         for (let i = 0; i < 25; i++) {
           sum1hv = sum1hv + Number(klinedata[i].v);
         }
+        let v1hma = sum1hv / 25;
 
-        let last1hcandleV = klinedata[0].v;
-        if (filter.v1h != 1) {
-          klinedata.slice(1, 5).forEach((item) => {
-            if (item.v > last1hcandleV) last1hcandleV = item.v;
+        if (filter.checkMultiple) {
+          let count = 0;
+          klinedata.slice(0, 5).forEach((item) => {
+            if (item.v > v1hma) count++;
           });
+          vma1h = count > 1 ? "Yes" : "No";
+        } else {
+          let last1hcandleV = klinedata[0].v;
+          if (filter.v1h != 1) {
+            klinedata.slice(1, 5).forEach((item) => {
+              if (item.v > last1hcandleV) last1hcandleV = item.v;
+            });
+            vma1h = v1hma < last1hcandleV ? "Yes" : "No";
+          }
         }
-
-        vma1h = sum1hv / 25 < last1hcandleV ? "Yes" : "No";
 
         //console.log(sum1hv / 25, klinedata, item);
 
@@ -215,6 +221,9 @@ function CurrentStatus() {
             if (item.v > last4hVol) last4hVol = item.v;
           });
         }
+
+        let green15m: "Yes" | "No" =
+          klinedata[0].c > klinedata[0].o ? "Yes" : "No";
 
         vma4h = sum4hv / 25 < last4hVol ? "Yes" : "No";
 
@@ -525,7 +534,7 @@ function CurrentStatus() {
                   {" "}
                   <Button variant={"contained"}>DailyBinance %</Button>
                 </TableCell>
-                <TableCell align="center">15m Green</TableCell>
+                <TableCell align="center">4h Green</TableCell>
 
                 <TableCell
                   align="center"
