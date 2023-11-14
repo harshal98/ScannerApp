@@ -71,6 +71,7 @@ export default [
   "FLOWUSDT",
   "RNDRUSDT",
   "BNTUSDT",
+  "USDCUSDT",
   "LQTYUSDT",
   "STORJUSDT",
   "OGNUSDT",
@@ -108,8 +109,6 @@ export default [
   "MANAUSDT",
   "AVAXUSDT",
   "DOTUSDT",
-  "LINKUSDT",
   "LTCUSDT",
   "ATOMUSDT",
-  "AAVEUSDT",
 ];

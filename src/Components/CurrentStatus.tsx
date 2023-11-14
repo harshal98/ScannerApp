@@ -231,6 +231,8 @@ function CurrentStatus() {
           .filter((item) => item.timeframe == "1d")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
+        let green15m: "Yes" | "No" =
+          klinedata[0].c > klinedata[0].o ? "Yes" : "No";
         if (klinedata.length >= 25) {
           for (let i = 0; i < 25; i++) {
             sum1dv = sum1dv + Number(klinedata[i].v);
