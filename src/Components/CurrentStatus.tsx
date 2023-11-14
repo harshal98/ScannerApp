@@ -222,9 +222,6 @@ function CurrentStatus() {
           });
         }
 
-        let green15m: "Yes" | "No" =
-          klinedata[0].c > klinedata[0].o ? "Yes" : "No";
-
         vma4h = sum4hv / 25 < last4hVol ? "Yes" : "No";
 
         //1 Day Volume CAlc
@@ -240,7 +237,8 @@ function CurrentStatus() {
           }
         } else sum1dv = 999999;
         let lastcandelvol = klinedata[0].v;
-
+        let green15m: "Yes" | "No" =
+          klinedata[0].c > klinedata[0].o ? "Yes" : "No";
         vma1d = sum1dv / 25 < lastcandelvol ? "Yes" : "No";
         //console.log(item.pair, sum1dv / 25, lastcandelvol, "1D");
         let sortedDaily = dailydata.sort((i, j) => {
@@ -248,6 +246,7 @@ function CurrentStatus() {
           else if (i.priceChangePercent < j.priceChangePercent) return 1;
           return 0;
         });
+
         return {
           pair: item,
           dailyIndex: sortedDaily.findIndex((find) => find.pair == item) + 1,

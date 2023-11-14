@@ -71,7 +71,6 @@ export default [
   "FLOWUSDT",
   "RNDRUSDT",
   "BNTUSDT",
-  "USDCUSDT",
   "LQTYUSDT",
   "STORJUSDT",
   "OGNUSDT",
