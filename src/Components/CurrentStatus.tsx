@@ -128,12 +128,6 @@ function CurrentStatus() {
 
           vma5m = v5ma < last5mcandleV ? "Yes" : "No";
         }
-        //Calculating last6 hours status
-        klinedata.slice(287 - 12 * filter.status24, 287).forEach((item) => {
-          if (high46h < item.h) high46h = item.h;
-        });
-
-        if (klinedata[0].c > high46h * 0.99) PercentStatusb424hr = "Bullish";
 
         //15 minute Volume CAlc
         let vma15m: "Yes" | "No" = "No";
@@ -199,6 +193,13 @@ function CurrentStatus() {
           }
         }
 
+        //Calculating last6 hours status
+        klinedata.slice(24 - 1 * filter.status24, 24).forEach((item) => {
+          if (high46h < item.c) high46h = item.h;
+        });
+
+        if (klinedata[0].c > high46h * 0.99) PercentStatusb424hr = "Bullish";
+
         //console.log(sum1hv / 25, klinedata, item);
 
         //4 hour Volume CAlc
@@ -241,17 +242,24 @@ function CurrentStatus() {
           klinedata[0].c > klinedata[0].o ? "Yes" : "No";
         vma1d = sum1dv / 25 < lastcandelvol ? "Yes" : "No";
         //console.log(item.pair, sum1dv / 25, lastcandelvol, "1D");
-        let sortedDaily = dailydata.sort((i, j) => {
-          if (i.priceChangePercent > j.priceChangePercent) return -1;
-          else if (i.priceChangePercent < j.priceChangePercent) return 1;
-          return 0;
-        });
+        let sortedDaily = dailydata.sort(
+          (
+            i: { priceChangePercent: number },
+            j: { priceChangePercent: number }
+          ) => {
+            if (i.priceChangePercent > j.priceChangePercent) return -1;
+            else if (i.priceChangePercent < j.priceChangePercent) return 1;
+            return 0;
+          }
+        );
 
         return {
           pair: item,
-          dailyIndex: sortedDaily.findIndex((find) => find.pair == item) + 1,
-          dailypercent: dailydata.filter((item24) => item24.pair == item)[0]
-            .priceChangePercent,
+          dailyIndex:
+            sortedDaily.findIndex((find: any) => find.pair == item) + 1,
+          dailypercent: dailydata.filter(
+            (item24: any) => item24.pair == item
+          )[0].priceChangePercent,
           PercentStatusb424hr,
           vma15m,
           vma1h,
