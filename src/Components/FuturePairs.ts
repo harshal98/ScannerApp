@@ -1,4 +1,5 @@
 export default [
+  "TIAUSDT",
   "MEMEUSDT",
   "ETHUSDT",
   "BTCUSDT",

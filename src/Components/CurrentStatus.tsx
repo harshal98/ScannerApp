@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BollingerBands } from "@debut/indicators";
 import useKlineData from "../hooks/useKlineData";
 import {
   Stack,
@@ -7,7 +8,7 @@ import {
   Select,
   MenuItem,
   Typography,
-  Checkbox,
+  //Checkbox,
 } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -28,22 +29,18 @@ type Change = {
   PercentStatusb424hr: "Bullish" | "Bearish";
   dailyIndex?: number;
   green15m: "Yes" | "No";
-  vma5m: "Yes" | "No";
-  vma15m: "Yes" | "No";
-  vma1h: "Yes" | "No";
-  vma4h: "Yes" | "No";
-  vma1d: "Yes" | "No";
+  b5m: "Yes" | "No";
+  b15m: "Yes" | "No";
+  b1h: "Yes" | "No";
+  b4h: "Yes" | "No";
+  b1d: "Yes" | "No";
 };
 
 type Inputs = {
   bullish: "Bullish" | "Bearish";
   status24: number;
   dailyRank: number;
-  v5m: number;
-  v15m: number;
-  v1h: number;
-  v4h: number;
-  checkMultiple: boolean;
+  bb: number;
 };
 
 function CurrentStatus() {
@@ -53,25 +50,21 @@ function CurrentStatus() {
     bullish: "Bullish",
     status24: 6,
     dailyRank: 50,
-    v5m: 1,
-    v15m: 6,
-    v1h: 6,
-    v4h: 6,
-    checkMultiple: true,
+    bb: 0.8,
   });
   const [data /*timer*/] = useKlineData();
 
   const [sort, setsort] = useState<{ sortby: string; asc: boolean }[]>([
     {
-      sortby: "v1h",
+      sortby: "b5m",
       asc: true,
     },
     {
-      sortby: "v15m",
+      sortby: "b15m",
       asc: true,
     },
     {
-      sortby: "v5m",
+      sortby: "b1h",
       asc: true,
     },
     {
@@ -89,6 +82,43 @@ function CurrentStatus() {
   const [changeinpercent, setchangeinpercent] = useState<Change[]>([]);
   //const [weekly /*setweekly*/] = useState(false);
 
+  function calcBB(
+    klinedata: {
+      o: number;
+      h: number;
+      l: number;
+      c: number;
+      v: number;
+    }[],
+    pair: string
+  ): "Yes" | "No" {
+    let bb5mObj = new BollingerBands();
+    let bb5mUpper = 0;
+    let bb5mLower = 0;
+    let temp: {
+      lower: number;
+      middle: number;
+      upper: number;
+    } = { lower: 0, middle: 0, upper: 0 };
+    for (let x = klinedata.length - 1; x >= 0; x--) {
+      temp = bb5mObj.nextValue(klinedata[x].c);
+      if (temp) {
+        bb5mUpper = temp.upper;
+        bb5mLower = temp.lower;
+      }
+    }
+
+    console.log(
+      (klinedata[0].c - bb5mLower) / (bb5mUpper - bb5mLower),
+      pair,
+      temp
+    );
+    //console.log(klinedata, pair);
+
+    if ((klinedata[0].c - bb5mLower) / (bb5mUpper - bb5mLower) > 0.8)
+      return "Yes";
+    else return "No";
+  }
   function generateChange(data: KlineData[]) {
     let temparray: Change[] = [];
 
@@ -96,79 +126,26 @@ function CurrentStatus() {
       //console.log(data);
 
       temparray = FuturePairs.map((item) => {
-        let PercentStatusb424hr: "Bullish" | "Bearish" = "Bearish";
-        let high46h = 0;
         let klinedata = data
           .filter((item) => item.timeframe == "5m")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
         //5minute Volume CAlc
-        let sum5mv = 0;
-        let vma5m: "Yes" | "No" = "No";
-        for (let i = 0; i < 25; i++) {
-          sum5mv = sum5mv + Number(klinedata[i].v);
-        }
-
-        let v5ma = sum5mv / 25;
-
-        if (filter.checkMultiple) {
-          let count = 0;
-          klinedata.slice(0, 5).forEach((item) => {
-            if (v5ma < item.v) count++;
-          });
-
-          vma5m = count > 1 ? "Yes" : "No";
-        } else {
-          let last5mcandleV = klinedata[0].v;
-          if (filter.v5m != 1) {
-            klinedata.slice(1, 5).forEach((item) => {
-              if (item.v > last5mcandleV) last5mcandleV = item.v;
-            });
-          }
-
-          vma5m = v5ma < last5mcandleV ? "Yes" : "No";
-        }
-        //Calculating last6 hours status
-        klinedata.slice(287 - 12 * filter.status24, 287).forEach((item) => {
-          if (high46h < item.h) high46h = item.h;
-        });
-
-        if (klinedata[0].c > high46h * 0.99) PercentStatusb424hr = "Bullish";
+        //let sum5mv = 0;
+        let b5m = calcBB(klinedata, item);
 
         //15 minute Volume CAlc
-        let vma15m: "Yes" | "No" = "No";
-        let sum15mv = 0;
+        let b15m: "Yes" | "No" = "No";
 
         klinedata = data
           .filter((item) => item.timeframe == "15m")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        for (let i = 0; i < 25; i++) {
-          sum15mv = sum15mv + Number(klinedata[i].v);
-        }
-        let v15ma = sum15mv / 25;
+        b15m = calcBB(klinedata, item);
 
-        if (filter.checkMultiple) {
-          let count = 0;
-          klinedata.slice(0, 5).forEach((item) => {
-            if (item.v > v15ma) count++;
-          });
-          vma15m = count > 1 ? "Yes" : "No";
-        } else {
-          let last15mcandleV = klinedata[0].v;
-
-          if (filter.v15m != 1) {
-            klinedata.slice(1, 5).forEach((item) => {
-              if (item.v > last15mcandleV) last15mcandleV = item.v;
-            });
-          }
-
-          vma15m = v15ma < last15mcandleV ? "Yes" : "No";
-        }
-
-        let vma1h: "Yes" | "No" = "No";
-        let vma4h: "Yes" | "No" = "No";
-        let vma1d: "Yes" | "No" = "No";
+        let b1h: "Yes" | "No" = "No";
+        let b4h: "Yes" | "No" = "No";
+        let b1d: "Yes" | "No" = "No";
 
         //1 hour Volume CAlc
 
@@ -176,29 +153,16 @@ function CurrentStatus() {
           .filter((item) => item.timeframe == "1h")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        let sum1hv = 0;
+        b1h = calcBB(klinedata, item);
 
-        for (let i = 0; i < 25; i++) {
-          sum1hv = sum1hv + Number(klinedata[i].v);
-        }
-        let v1hma = sum1hv / 25;
+        //Calculating last6 hours status
+        let PercentStatusb424hr: "Bullish" | "Bearish" = "Bearish";
+        let high46h = 0;
+        klinedata.slice(24 - 12 * filter.status24, 24).forEach((item) => {
+          if (high46h < item.c) high46h = item.c;
+        });
 
-        if (filter.checkMultiple) {
-          let count = 0;
-          klinedata.slice(0, 5).forEach((item) => {
-            if (item.v > v1hma) count++;
-          });
-          vma1h = count > 1 ? "Yes" : "No";
-        } else {
-          let last1hcandleV = klinedata[0].v;
-          if (filter.v1h != 1) {
-            klinedata.slice(1, 5).forEach((item) => {
-              if (item.v > last1hcandleV) last1hcandleV = item.v;
-            });
-            vma1h = v1hma < last1hcandleV ? "Yes" : "No";
-          }
-        }
-
+        if (klinedata[0].c > high46h * 0.99) PercentStatusb424hr = "Bullish";
         //console.log(sum1hv / 25, klinedata, item);
 
         //4 hour Volume CAlc
@@ -206,58 +170,38 @@ function CurrentStatus() {
           .filter((item) => item.timeframe == "4h")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        let sum4hv = 0;
-
-        if (klinedata.length >= 25) {
-          for (let i = 0; i < 25; i++) {
-            sum4hv = sum4hv + Number(klinedata[i].v);
-          }
-        } else sum4hv = 9999999;
-
-        let last4hVol = klinedata[0].v;
-
-        if (filter.v4h != 1) {
-          klinedata.slice(1, 5).forEach((item) => {
-            if (item.v > last4hVol) last4hVol = item.v;
-          });
-        }
-
-        vma4h = sum4hv / 25 < last4hVol ? "Yes" : "No";
+        b4h = calcBB(klinedata, item);
 
         //1 Day Volume CAlc
-        let sum1dv = 0;
 
         klinedata = data
           .filter((item) => item.timeframe == "1d")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        if (klinedata.length >= 25) {
-          for (let i = 0; i < 25; i++) {
-            sum1dv = sum1dv + Number(klinedata[i].v);
+        b1d = calcBB(klinedata, item);
+        let sortedDaily = dailydata.sort(
+          (
+            i: { priceChangePercent: number },
+            j: { priceChangePercent: number }
+          ) => {
+            if (i.priceChangePercent > j.priceChangePercent) return -1;
+            else if (i.priceChangePercent < j.priceChangePercent) return 1;
+            return 0;
           }
-        } else sum1dv = 999999;
-        let lastcandelvol = klinedata[0].v;
+        );
         let green15m: "Yes" | "No" =
           klinedata[0].c > klinedata[0].o ? "Yes" : "No";
-        vma1d = sum1dv / 25 < lastcandelvol ? "Yes" : "No";
-        //console.log(item.pair, sum1dv / 25, lastcandelvol, "1D");
-        let sortedDaily = dailydata.sort((i, j) => {
-          if (i.priceChangePercent > j.priceChangePercent) return -1;
-          else if (i.priceChangePercent < j.priceChangePercent) return 1;
-          return 0;
-        });
-
         return {
           pair: item,
           dailyIndex: sortedDaily.findIndex((find) => find.pair == item) + 1,
           dailypercent: dailydata.filter((item24) => item24.pair == item)[0]
             .priceChangePercent,
           PercentStatusb424hr,
-          vma15m,
-          vma1h,
-          vma4h,
-          vma1d,
-          vma5m,
+          b15m,
+          b1h,
+          b4h,
+          b1d,
+          b5m,
           green15m,
         };
       });
@@ -311,41 +255,41 @@ function CurrentStatus() {
         });
       }
     }
-    if (sort.sortby == "v1h") {
+    if (sort.sortby == "b1h") {
       if (sort.asc == true) {
         sorted = unsorted.sort((i, j) => {
-          if (i.vma1h > j.vma1h) return -1;
+          if (i.b1h > j.b1h) return -1;
           else return 1;
         });
       } else {
         sorted = unsorted.sort((i, j) => {
-          if (i.vma1h < j.vma1h) return -1;
+          if (i.b1h < j.b1h) return -1;
           else return 1;
         });
       }
     }
-    if (sort.sortby == "v5m") {
+    if (sort.sortby == "b5m") {
       if (sort.asc == true) {
         sorted = unsorted.sort((i, j) => {
-          if (i.vma5m > j.vma5m) return -1;
+          if (i.b5m > j.b5m) return -1;
           else return 1;
         });
       } else {
         sorted = unsorted.sort((i, j) => {
-          if (i.vma5m < j.vma5m) return -1;
+          if (i.b5m < j.b5m) return -1;
           else return 1;
         });
       }
     }
-    if (sort.sortby == "v15m") {
+    if (sort.sortby == "b15m") {
       if (sort.asc == true) {
         sorted = unsorted.sort((i, j) => {
-          if (i.vma15m > j.vma15m) return -1;
+          if (i.b15m > j.b15m) return -1;
           else return 1;
         });
       } else {
         sorted = unsorted.sort((i, j) => {
-          if (i.vma15m < j.vma15m) return -1;
+          if (i.b15m < j.b15m) return -1;
           else return 1;
         });
       }
@@ -410,12 +354,8 @@ function CurrentStatus() {
     setfilter({
       status24: Number(data.status24),
       bullish: data.bullish,
-      v15m: Number(data.v15m),
-      v1h: Number(data.v1h),
       dailyRank: Number(data.dailyRank),
-      v4h: Number(data.v4h),
-      v5m: Number(data.v5m),
-      checkMultiple: data.checkMultiple,
+      bb: data.bb,
     });
   };
   return (
@@ -464,43 +404,17 @@ function CurrentStatus() {
               <MenuItem value="4">4</MenuItem>
               <MenuItem value="2">2</MenuItem>
             </Select>
-            <Typography>5mVol</Typography>
+            <Typography>BB%</Typography>
             <Select
-              defaultValue={filter.v5m}
-              {...register("v5m", { required: true })}
+              defaultValue={filter.bb}
+              {...register("bb", { required: true })}
             >
-              <MenuItem value="6">6</MenuItem>
+              <MenuItem value="0.6">0.6</MenuItem>
+              <MenuItem value="0.7">0.6</MenuItem>
+              <MenuItem value="0.8">0.6</MenuItem>
+              <MenuItem value="0.9">0.9</MenuItem>
               <MenuItem value="1">1</MenuItem>
             </Select>
-            <Typography>15mVol</Typography>
-            <Select
-              defaultValue={filter.v15m}
-              {...register("v15m", { required: true })}
-            >
-              <MenuItem value="6">6</MenuItem>
-              <MenuItem value="1">1</MenuItem>
-            </Select>
-            <Typography>1hVol</Typography>
-            <Select
-              defaultValue={filter.v1h}
-              {...register("v1h", { required: true })}
-            >
-              <MenuItem value="6">6</MenuItem>
-              <MenuItem value="1">1</MenuItem>
-            </Select>
-            <Typography>4hVol</Typography>
-            <Select
-              defaultValue={filter.v4h}
-              {...register("v4h", { required: true })}
-            >
-              <MenuItem value="6">6</MenuItem>
-              <MenuItem value="1">1</MenuItem>
-            </Select>
-            <Typography>CheckMultipleCandles</Typography>
-            <Checkbox
-              {...register("checkMultiple")}
-              defaultChecked={filter.checkMultiple}
-            />
             <Button type="submit" color="primary" variant={"contained"}>
               Filter
             </Button>
@@ -538,7 +452,7 @@ function CurrentStatus() {
                 <TableCell
                   align="center"
                   onClick={() => {
-                    setSortState("v5m");
+                    setSortState("b5m");
                   }}
                 >
                   <Button variant={"contained"}>5mVolMA</Button>
@@ -546,7 +460,7 @@ function CurrentStatus() {
                 <TableCell
                   align="center"
                   onClick={() => {
-                    setSortState("v15m");
+                    setSortState("b15m");
                   }}
                 >
                   <Button variant={"contained"}>15mVolMA</Button>
@@ -554,7 +468,7 @@ function CurrentStatus() {
                 <TableCell
                   align="center"
                   onClick={() => {
-                    setSortState("v1h");
+                    setSortState("b1h");
                   }}
                 >
                   <Button variant={"contained"}>1hVolMA</Button>
@@ -614,41 +528,41 @@ function CurrentStatus() {
                       <TableCell align="center">
                         <Button
                           variant={"contained"}
-                          color={item.vma5m == "Yes" ? "success" : "error"}
+                          color={item.b5m == "Yes" ? "success" : "error"}
                         >
-                          {item.vma5m}
+                          {item.b5m}
                         </Button>
                       </TableCell>
                       <TableCell align="center">
                         <Button
                           variant={"contained"}
-                          color={item.vma15m == "Yes" ? "success" : "error"}
+                          color={item.b15m == "Yes" ? "success" : "error"}
                         >
-                          {item.vma15m}
+                          {item.b15m}
                         </Button>
                       </TableCell>
                       <TableCell align="center">
                         <Button
                           variant={"contained"}
-                          color={item.vma1h == "Yes" ? "success" : "error"}
+                          color={item.b1h == "Yes" ? "success" : "error"}
                         >
-                          {item.vma1h}
+                          {item.b1h}
                         </Button>
                       </TableCell>
                       <TableCell align="center">
                         <Button
                           variant={"contained"}
-                          color={item.vma4h == "Yes" ? "success" : "error"}
+                          color={item.b4h == "Yes" ? "success" : "error"}
                         >
-                          {item.vma4h}
+                          {item.b4h}
                         </Button>
                       </TableCell>
                       <TableCell align="center">
                         <Button
                           variant={"contained"}
-                          color={item.vma1d == "Yes" ? "success" : "error"}
+                          color={item.b1d == "Yes" ? "success" : "error"}
                         >
-                          {item.vma1d}
+                          {item.b1d}
                         </Button>
                       </TableCell>
                     </TableRow>

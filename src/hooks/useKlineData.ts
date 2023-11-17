@@ -38,7 +38,7 @@ function useKlineData(/*limit = 1000*/): [list: KlineData[] /*timer: number*/] {
 
     function getData(
       period: "5m" | "15m" | "1h" | "4h" | "1d",
-      limit: number = 25
+      limit: number = 100
     ) {
       let responses: Promise<AxiosResponse>[] = [];
       for (let x of FuturePairs) {
@@ -104,7 +104,7 @@ function useKlineData(/*limit = 1000*/): [list: KlineData[] /*timer: number*/] {
 
     function getAllTimeFrameData() {
       let Parray = [];
-      Parray.push(getData("5m", 300));
+      Parray.push(getData("5m"));
       Parray.push(getData("15m"));
       Parray.push(getData("1h"));
       Parray.push(getData("4h"));
