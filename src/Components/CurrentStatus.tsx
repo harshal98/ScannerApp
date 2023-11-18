@@ -158,7 +158,7 @@ function CurrentStatus() {
         //Calculating last6 hours status
         let PercentStatusb424hr: "Bullish" | "Bearish" = "Bearish";
         let high46h = 0;
-        klinedata.slice(24 - 12 * filter.status24, 24).forEach((item) => {
+        klinedata.slice(24 - 1 * filter.status24, 24).forEach((item) => {
           if (high46h < item.c) high46h = item.c;
         });
 
