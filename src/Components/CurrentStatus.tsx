@@ -92,7 +92,7 @@ function CurrentStatus() {
       c: number;
       v: number;
     }[],
-    pair: string
+    _pair?: string
   ): "Yes" | "No" {
     let bb5mObj = new BollingerBands();
     let bb5mUpper = 0;
@@ -110,11 +110,11 @@ function CurrentStatus() {
       }
     }
 
-    console.log(
-      (klinedata[0].c - bb5mLower) / (bb5mUpper - bb5mLower),
-      pair,
-      temp
-    );
+    // console.log(
+    //   (klinedata[0].c - bb5mLower) / (bb5mUpper - bb5mLower),
+    //   pair,
+    //   temp
+    // );
     //console.log(klinedata, pair);
 
     if ((klinedata[0].c - bb5mLower) / (bb5mUpper - bb5mLower) > 0.8)
@@ -354,7 +354,7 @@ function CurrentStatus() {
     setsort(temp);
   }
   const onSubmit = (data: Inputs) => {
-    console.log(data);
+    // console.log(data);
     setfilter({
       status24: Number(data.status24),
       bullish: data.bullish,
@@ -495,7 +495,7 @@ function CurrentStatus() {
             </TableHead>
             <TableBody>
               {changeinpercent.map((item) => {
-                if (item.pair == "BTCUSDT") console.log(filter, "FilterState");
+                // if (item.pair == "BTCUSDT") console.log(filter, "FilterState");
 
                 if (
                   item.PercentStatusb424hr == filter.bullish &&
