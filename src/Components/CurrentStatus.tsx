@@ -41,6 +41,7 @@ type Inputs = {
   status24: number;
   dailyRank: number;
   bb: number;
+  hoursGapb424: number;
 };
 
 function CurrentStatus() {
@@ -51,6 +52,7 @@ function CurrentStatus() {
     status24: 6,
     dailyRank: 50,
     bb: 0.8,
+    hoursGapb424: 0,
   });
   const [data /*timer*/] = useKlineData();
 
@@ -158,9 +160,11 @@ function CurrentStatus() {
         //Calculating last6 hours status
         let PercentStatusb424hr: "Bullish" | "Bearish" = "Bearish";
         let high46h = 0;
-        klinedata.slice(24 - 1 * filter.status24, 24).forEach((item) => {
-          if (high46h < item.c) high46h = item.c;
-        });
+        klinedata
+          .slice(24 - 1 * filter.status24, 24 - filter.hoursGapb424)
+          .forEach((item) => {
+            if (high46h < item.c) high46h = item.c;
+          });
 
         if (klinedata[0].c > high46h * 0.99) PercentStatusb424hr = "Bullish";
         //console.log(sum1hv / 25, klinedata, item);
@@ -355,7 +359,8 @@ function CurrentStatus() {
       status24: Number(data.status24),
       bullish: data.bullish,
       dailyRank: Number(data.dailyRank),
-      bb: data.bb,
+      bb: Number(data.bb),
+      hoursGapb424: Number(data.hoursGapb424),
     });
   };
   return (
@@ -404,14 +409,25 @@ function CurrentStatus() {
               <MenuItem value="4">4</MenuItem>
               <MenuItem value="2">2</MenuItem>
             </Select>
+            <Typography>Hours Gap before24</Typography>
+            <Select
+              defaultValue={filter.hoursGapb424}
+              {...register("hoursGapb424", { required: true })}
+            >
+              <MenuItem value="0">0</MenuItem>
+              <MenuItem value="1">1</MenuItem>
+              <MenuItem value="2">2</MenuItem>
+              <MenuItem value="3">3</MenuItem>
+              <MenuItem value="4">4</MenuItem>
+            </Select>
             <Typography>BB%</Typography>
             <Select
               defaultValue={filter.bb}
               {...register("bb", { required: true })}
             >
               <MenuItem value="0.6">0.6</MenuItem>
-              <MenuItem value="0.7">0.6</MenuItem>
-              <MenuItem value="0.8">0.6</MenuItem>
+              <MenuItem value="0.7">0.7</MenuItem>
+              <MenuItem value="0.8">0.8</MenuItem>
               <MenuItem value="0.9">0.9</MenuItem>
               <MenuItem value="1">1</MenuItem>
             </Select>
@@ -447,7 +463,7 @@ function CurrentStatus() {
                   {" "}
                   <Button variant={"contained"}>DailyBinance %</Button>
                 </TableCell>
-                <TableCell align="center">4h Green</TableCell>
+                <TableCell align="center">Daily Candle Green</TableCell>
 
                 <TableCell
                   align="center"
