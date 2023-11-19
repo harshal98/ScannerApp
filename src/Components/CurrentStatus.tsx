@@ -70,6 +70,10 @@ function CurrentStatus() {
       asc: true,
     },
     {
+      sortby: "b4h",
+      asc: true,
+    },
+    {
       sortby: "StatusB4",
       asc: true,
     },
@@ -92,7 +96,8 @@ function CurrentStatus() {
       c: number;
       v: number;
     }[],
-    _pair?: string
+    _pair: string,
+    timeframe: string
   ): "Yes" | "No" {
     let bb5mObj = new BollingerBands();
     let bb5mUpper = 0;
@@ -116,10 +121,18 @@ function CurrentStatus() {
     //   temp
     // );
     //console.log(klinedata, pair);
+    let bbpercent = (klinedata[0].c - bb5mLower) / (bb5mUpper - bb5mLower);
 
-    if ((klinedata[0].c - bb5mLower) / (bb5mUpper - bb5mLower) > 0.8)
-      return "Yes";
-    else return "No";
+    if (bbpercent < 0.5 && timeframe == "5m") return "Yes";
+
+    if (bbpercent < 0.5 && timeframe == "15m") return "Yes";
+
+    if (bbpercent > 0.5 && timeframe == "1h") return "Yes";
+
+    if (bbpercent > 0.5 && timeframe == "4h") return "Yes";
+
+    if (bbpercent > 0.5 && timeframe == "1d") return "Yes";
+    return "No";
   }
   function generateChange(data: KlineData[]) {
     let temparray: Change[] = [];
@@ -134,7 +147,7 @@ function CurrentStatus() {
 
         //5minute Volume CAlc
         //let sum5mv = 0;
-        let b5m = calcBB(klinedata, item);
+        let b5m = calcBB(klinedata, item, "5m");
 
         //15 minute Volume CAlc
         let b15m: "Yes" | "No" = "No";
@@ -143,7 +156,7 @@ function CurrentStatus() {
           .filter((item) => item.timeframe == "15m")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        b15m = calcBB(klinedata, item);
+        b15m = calcBB(klinedata, item, "15m");
 
         let b1h: "Yes" | "No" = "No";
         let b4h: "Yes" | "No" = "No";
@@ -155,7 +168,7 @@ function CurrentStatus() {
           .filter((item) => item.timeframe == "1h")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        b1h = calcBB(klinedata, item);
+        b1h = calcBB(klinedata, item, "1h");
 
         //Calculating last6 hours status
         let PercentStatusb424hr: "Bullish" | "Bearish" = "Bearish";
@@ -174,7 +187,7 @@ function CurrentStatus() {
           .filter((item) => item.timeframe == "4h")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        b4h = calcBB(klinedata, item);
+        b4h = calcBB(klinedata, item, "4h");
 
         //1 Day Volume CAlc
 
@@ -182,7 +195,7 @@ function CurrentStatus() {
           .filter((item) => item.timeframe == "1d")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        b1d = calcBB(klinedata, item);
+        b1d = calcBB(klinedata, item, "1d");
         let sortedDaily = dailydata.sort(
           (
             i: { priceChangePercent: number },
@@ -294,6 +307,19 @@ function CurrentStatus() {
       } else {
         sorted = unsorted.sort((i, j) => {
           if (i.b15m < j.b15m) return -1;
+          else return 1;
+        });
+      }
+    }
+    if (sort.sortby == "b4h") {
+      if (sort.asc == true) {
+        sorted = unsorted.sort((i, j) => {
+          if (i.b4h > j.b4h) return -1;
+          else return 1;
+        });
+      } else {
+        sorted = unsorted.sort((i, j) => {
+          if (i.b4h < j.b4h) return -1;
           else return 1;
         });
       }
