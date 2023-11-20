@@ -128,41 +128,55 @@ function CurrentStatus() {
       klinedata.slice(0, 24).forEach((item) => (sum = sum + item.v));
       let vma = sum / 25;
       let high6candlevol = klinedata[0].v;
-      klinedata.slice(0, 5).forEach((item) => {
+      klinedata.slice(1, 6).forEach((item) => {
         if (item.v > high6candlevol) high6candlevol = item.v;
       });
+      let closesum = klinedata.slice(0, 100).map((item) => item.c);
+      let ma50 = closesum.slice(0, 50).reduce((a, b) => a + b) / 50;
+      let ma100 = closesum.slice(0, 100).reduce((a, b) => a + b) / 100;
+      //console.log(_pair, ma100, closesum.slice(0, 100));
 
       if (
-        ((vma < high6candlevol && temp.upper / temp.lower < 1.03) ||
-          bbpercent < 0.5) &&
+        vma < high6candlevol &&
+        (temp.upper / temp.lower < 1.025 || bbpercent < 0.5) &&
+        //klinedata[0].c > ma50 &&
+        //klinedata[0].c > ma100 &&
         timeframe == "5m"
       )
         return "Yes";
 
       if (
-        ((vma < high6candlevol && temp.upper / temp.lower < 1.03) ||
-          bbpercent < 0.5) &&
+        vma < high6candlevol &&
+        (temp.upper / temp.lower < 1.025 || bbpercent < 0.5) &&
+        //klinedata[0].c > ma50 &&
+        //klinedata[0].c > ma100 &&
         timeframe == "15m"
       )
         return "Yes";
 
       if (
-        ((vma < high6candlevol && temp.upper / temp.lower > 1.1) ||
-          bbpercent > 0.5) &&
+        vma < high6candlevol &&
+        (temp.upper / temp.lower > 1.1 || bbpercent > 0.5) &&
+        klinedata[0].c > ma50 &&
+        klinedata[0].c > ma100 &&
         timeframe == "1h"
       )
         return "Yes";
 
       if (
-        ((vma < high6candlevol && temp.upper / temp.lower > 1.1) ||
-          bbpercent > 0.5) &&
+        vma < high6candlevol &&
+        (temp.upper / temp.lower > 1.1 || bbpercent > 0.5) &&
+        klinedata[0].c > ma50 &&
+        klinedata[0].c > ma100 &&
         timeframe == "4h"
       )
         return "Yes";
 
       if (
-        ((vma < high6candlevol && temp.upper / temp.lower > 1.1) ||
-          bbpercent > 0.5) &&
+        vma < high6candlevol &&
+        (temp.upper / temp.lower > 1.1 || bbpercent > 0.5) &&
+        klinedata[0].c > ma50 &&
+        klinedata[0].c > ma100 &&
         timeframe == "1d"
       )
         return "Yes";
@@ -533,7 +547,7 @@ function CurrentStatus() {
                     setSortState("b5m");
                   }}
                 >
-                  <Button variant={"contained"}>5mVolMA</Button>
+                  <Button variant={"contained"}>5m</Button>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -541,7 +555,7 @@ function CurrentStatus() {
                     setSortState("b15m");
                   }}
                 >
-                  <Button variant={"contained"}>15mVolMA</Button>
+                  <Button variant={"contained"}>15m</Button>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -549,10 +563,10 @@ function CurrentStatus() {
                     setSortState("b1h");
                   }}
                 >
-                  <Button variant={"contained"}>1hVolMA</Button>
+                  <Button variant={"contained"}>1h</Button>
                 </TableCell>
-                <TableCell align="center">4hVolMA</TableCell>
-                <TableCell align="center">1DVolMA</TableCell>
+                <TableCell align="center">4h</TableCell>
+                <TableCell align="center">1D</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
