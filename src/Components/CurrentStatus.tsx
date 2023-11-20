@@ -121,17 +121,53 @@ function CurrentStatus() {
     //   temp
     // );
     //console.log(klinedata, pair);
-    let bbpercent = (klinedata[0].c - bb5mLower) / (bb5mUpper - bb5mLower);
 
-    if (bbpercent < 0.5 && timeframe == "5m") return "Yes";
+    if (temp) {
+      let sum = 0;
+      let bbpercent = (klinedata[0].c - bb5mLower) / (bb5mUpper - bb5mLower);
+      klinedata.slice(0, 24).forEach((item) => (sum = sum + item.v));
+      let vma = sum / 25;
+      let high6candlevol = klinedata[0].v;
+      klinedata.slice(0, 5).forEach((item) => {
+        if (item.v > high6candlevol) high6candlevol = item.v;
+      });
 
-    if (bbpercent < 0.5 && timeframe == "15m") return "Yes";
+      if (
+        ((vma < high6candlevol && temp.upper / temp.lower < 1.03) ||
+          bbpercent < 0.5) &&
+        timeframe == "5m"
+      )
+        return "Yes";
 
-    if (bbpercent > 0.5 && timeframe == "1h") return "Yes";
+      if (
+        ((vma < high6candlevol && temp.upper / temp.lower < 1.03) ||
+          bbpercent < 0.5) &&
+        timeframe == "15m"
+      )
+        return "Yes";
 
-    if (bbpercent > 0.5 && timeframe == "4h") return "Yes";
+      if (
+        ((vma < high6candlevol && temp.upper / temp.lower > 1.1) ||
+          bbpercent > 0.5) &&
+        timeframe == "1h"
+      )
+        return "Yes";
 
-    if (bbpercent > 0.5 && timeframe == "1d") return "Yes";
+      if (
+        ((vma < high6candlevol && temp.upper / temp.lower > 1.1) ||
+          bbpercent > 0.5) &&
+        timeframe == "4h"
+      )
+        return "Yes";
+
+      if (
+        ((vma < high6candlevol && temp.upper / temp.lower > 1.1) ||
+          bbpercent > 0.5) &&
+        timeframe == "1d"
+      )
+        return "Yes";
+      return "No";
+    }
     return "No";
   }
   function generateChange(data: KlineData[]) {
