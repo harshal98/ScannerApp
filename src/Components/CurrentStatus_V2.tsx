@@ -204,8 +204,11 @@ function CurrentStatus_V2() {
         // (temp.upper / temp.lower > 1.1 || bbpercent > 0.5) &&
         // klinedata[0].c > ma50 &&
         // klinedata[0].c > ma100 &&
-        BBlist[BBlist.length - 1].lower * 1.01 >
-          BBlist[BBlist.length - 1].price &&
+        // BBlist[BBlist.length - 1].lower * 1.01 >
+        //   BBlist[BBlist.length - 1].price &&
+        bbpercent > 0.5 &&
+        klinedata[0].c > ma50 &&
+        klinedata[0].c > ma100 &&
         timeframe == "1h"
       )
         return "Yes";
