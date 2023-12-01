@@ -44,7 +44,7 @@ type Inputs = {
   hoursGapb424: number;
 };
 
-function CurrentStatus() {
+function CurrentStatus_V2() {
   const { register, handleSubmit } = useForm<Inputs>();
   const [showFilter, setShowFilter] = useState(false);
   const [filter, setfilter] = useState<Inputs>({
@@ -73,14 +73,14 @@ function CurrentStatus() {
       sortby: "b4h",
       asc: true,
     },
-    {
-      sortby: "StatusB4",
-      asc: true,
-    },
-    {
-      sortby: "15green",
-      asc: true,
-    },
+    // {
+    //   sortby: "StatusB4",
+    //   asc: true,
+    // },
+    // {
+    //   sortby: "15green",
+    //   asc: true,
+    // },
   ]);
 
   let indexdisplay = 0;
@@ -107,11 +107,43 @@ function CurrentStatus() {
       middle: number;
       upper: number;
     } = { lower: 0, middle: 0, upper: 0 };
+    type BBarray = {
+      upper: number;
+      lower: number;
+      width: number;
+      price: number;
+    }[];
+    let BBlist: BBarray = [];
     for (let x = klinedata.length - 1; x >= 0; x--) {
       temp = bb5mObj.nextValue(klinedata[x].c);
       if (temp) {
         bb5mUpper = temp.upper;
         bb5mLower = temp.lower;
+        BBlist.push({
+          upper: temp.upper,
+          lower: temp.lower,
+          width: temp.upper - temp.lower,
+          price: klinedata[x].c,
+        });
+      }
+    }
+
+    BBlist = BBlist.slice(BBlist.length - 49, BBlist.length);
+    let maxw = 0;
+    let maxindex = 0;
+    for (let x = BBlist.length - 1; x >= 0; x--) {
+      if (BBlist[x].width > maxw) {
+        maxw = BBlist[x].width;
+        maxindex = x;
+      }
+    }
+
+    let minw = 999999999;
+    let minindex = maxindex;
+    for (let x = minindex + 1; x < BBlist.length; x++) {
+      if (BBlist[x].width < minw) {
+        minw = BBlist[x].width;
+        minindex = x;
       }
     }
 
@@ -136,9 +168,20 @@ function CurrentStatus() {
       let ma100 = closesum.slice(0, 100).reduce((a, b) => a + b) / 100;
       //console.log(_pair, ma100, closesum.slice(0, 100));
 
+      // console.log(
+      //   BBlist[BBlist.length - 1].lower,
+      //   BBlist[BBlist.length - 1].price,
+      //   BBlist[BBlist.length - 1].lower * 1.01 <
+      //     BBlist[BBlist.length - 1].price,
+      //   _pair,
+      //   timeframe
+      // );
+
       if (
-        vma < high6candlevol &&
-        (temp.upper / temp.lower < 1.025 || bbpercent < 0.5) &&
+        //vma * 2 < high6candlevol &&
+        //(temp.upper / temp.lower < 1.025 || bbpercent < 0.5) &&
+        BBlist[BBlist.length - 1].lower * 1.01 >
+          BBlist[BBlist.length - 1].price &&
         //klinedata[0].c > ma50 &&
         //klinedata[0].c > ma100 &&
         timeframe == "5m"
@@ -146,8 +189,10 @@ function CurrentStatus() {
         return "Yes";
 
       if (
-        vma < high6candlevol &&
-        (temp.upper / temp.lower < 1.025 || bbpercent < 0.5) &&
+        //vma * 2 < high6candlevol &&
+        //(temp.upper / temp.lower < 1.025 || bbpercent < 0.5) &&
+        BBlist[BBlist.length - 1].lower * 1.01 >
+          BBlist[BBlist.length - 1].price &&
         //klinedata[0].c > ma50 &&
         //klinedata[0].c > ma100 &&
         timeframe == "15m"
@@ -155,17 +200,20 @@ function CurrentStatus() {
         return "Yes";
 
       if (
-        vma < high6candlevol &&
-        (temp.upper / temp.lower > 1.1 || bbpercent > 0.5) &&
-        klinedata[0].c > ma50 &&
-        klinedata[0].c > ma100 &&
+        //vma * 2 < high6candlevol &&
+        // (temp.upper / temp.lower > 1.1 || bbpercent > 0.5) &&
+        // klinedata[0].c > ma50 &&
+        // klinedata[0].c > ma100 &&
+        BBlist[BBlist.length - 1].lower * 1.01 >
+          BBlist[BBlist.length - 1].price &&
         timeframe == "1h"
       )
         return "Yes";
 
       if (
-        vma < high6candlevol &&
-        (temp.upper / temp.lower > 1.1 || bbpercent > 0.5) &&
+        // vma < high6candlevol &&
+        // (temp.upper / temp.lower > 1.1 || bbpercent > 0.5) &&
+        bbpercent > 0.5 &&
         klinedata[0].c > ma50 &&
         klinedata[0].c > ma100 &&
         timeframe == "4h"
@@ -228,8 +276,14 @@ function CurrentStatus() {
           .forEach((item) => {
             if (high46h < item.c) high46h = item.c;
           });
+        // let low4 = 999999;
+        // klinedata.slice(20, 24).forEach((item) => {
+        //   if (low4 > item.c) low4 = item.c;
+        // });
 
-        if (klinedata[0].c > high46h * 0.99) PercentStatusb424hr = "Bullish";
+        //console.log(klinedata.slice(20, 24), item);
+
+        if (klinedata[0].c > high46h) PercentStatusb424hr = "Bullish";
         //console.log(sum1hv / 25, klinedata, item);
 
         //4 hour Volume CAlc
@@ -573,92 +627,90 @@ function CurrentStatus() {
               {changeinpercent.map((item) => {
                 // if (item.pair == "BTCUSDT") console.log(filter, "FilterState");
 
-                if (
-                  item.PercentStatusb424hr == filter.bullish &&
-                  item.dailyIndex != null
-                    ? item.dailyIndex < filter.dailyRank
-                    : false
-                )
-                  return (
-                    <TableRow key={item.pair}>
-                      <TableCell align="center">{++indexdisplay}</TableCell>
-                      <TableCell align="center">
-                        {
-                          <Link
-                            href={`https://www.tradingview.com/chart/V7sMPZg2/?symbol=BINANCE:${item.pair}`}
-                            target="_blank"
-                            underline="hover"
-                          >
-                            {item.pair}
-                          </Link>
+                // if (
+                //   item.PercentStatusb424hr == filter.bullish &&
+                //   item.dailyIndex != null
+                //     ? item.dailyIndex < filter.dailyRank
+                //     : false
+                // )
+                return (
+                  <TableRow key={item.pair}>
+                    <TableCell align="center">{++indexdisplay}</TableCell>
+                    <TableCell align="center">
+                      {
+                        <Link
+                          href={`https://www.tradingview.com/chart/V7sMPZg2/?symbol=BINANCE:${item.pair}`}
+                          target="_blank"
+                          underline="hover"
+                        >
+                          {item.pair}
+                        </Link>
+                      }
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={
+                          item.PercentStatusb424hr == "Bullish"
+                            ? "success"
+                            : "error"
                         }
-                      </TableCell>
-                      <TableCell align="center">
-                        <Button
-                          variant={"contained"}
-                          color={
-                            item.PercentStatusb424hr == "Bullish"
-                              ? "success"
-                              : "error"
-                          }
-                        >
-                          {item.PercentStatusb424hr}
-                        </Button>
-                      </TableCell>
-                      <TableCell align="center">{item.dailyIndex}</TableCell>
-                      <TableCell align="center">
-                        {item.dailypercent} %
-                      </TableCell>
-                      <TableCell align="center">
-                        <Button
-                          variant={"contained"}
-                          color={item.green15m == "Yes" ? "success" : "error"}
-                        >
-                          {item.green15m}
-                        </Button>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Button
-                          variant={"contained"}
-                          color={item.b5m == "Yes" ? "success" : "error"}
-                        >
-                          {item.b5m}
-                        </Button>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Button
-                          variant={"contained"}
-                          color={item.b15m == "Yes" ? "success" : "error"}
-                        >
-                          {item.b15m}
-                        </Button>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Button
-                          variant={"contained"}
-                          color={item.b1h == "Yes" ? "success" : "error"}
-                        >
-                          {item.b1h}
-                        </Button>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Button
-                          variant={"contained"}
-                          color={item.b4h == "Yes" ? "success" : "error"}
-                        >
-                          {item.b4h}
-                        </Button>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Button
-                          variant={"contained"}
-                          color={item.b1d == "Yes" ? "success" : "error"}
-                        >
-                          {item.b1d}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
+                      >
+                        {item.PercentStatusb424hr}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">{item.dailyIndex}</TableCell>
+                    <TableCell align="center">{item.dailypercent} %</TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.green15m == "Yes" ? "success" : "error"}
+                      >
+                        {item.green15m}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.b5m == "Yes" ? "success" : "error"}
+                      >
+                        {item.b5m}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.b15m == "Yes" ? "success" : "error"}
+                      >
+                        {item.b15m}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.b1h == "Yes" ? "success" : "error"}
+                      >
+                        {item.b1h}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.b4h == "Yes" ? "success" : "error"}
+                      >
+                        {item.b4h}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant={"contained"}
+                        color={item.b1d == "Yes" ? "success" : "error"}
+                      >
+                        {item.b1d}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
               })}
             </TableBody>
           </Table>
@@ -667,5 +719,4 @@ function CurrentStatus() {
     </>
   );
 }
-
-export default CurrentStatus;
+export default CurrentStatus_V2;

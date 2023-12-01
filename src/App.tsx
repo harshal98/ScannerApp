@@ -1,8 +1,9 @@
-import CurrentStatus from "./Components/CurrentStatus";
+//import CurrentStatus from "./Components/CurrentStatus";
 import { Box, Button, Tab } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { useState } from "react";
+import CurrentStatus_V2 from "./Components/CurrentStatus_V2";
 
 function App() {
   const [theme, settheme] = useState<"light" | "dark">("light");
@@ -25,7 +26,7 @@ function App() {
             {theme == "light" ? "Dark Theme" : "Light Theme"}
           </Button>
         </Box>
-        <CurrentStatus />
+        <CurrentStatus_V2 />
       </Box>
     </ThemeProvider>
   );
