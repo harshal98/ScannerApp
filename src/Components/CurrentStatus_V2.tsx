@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BollingerBands } from "@debut/indicators";
+import { AC } from "@debut/indicators";
 import useKlineData from "../hooks/useKlineData";
 import {
   Stack,
@@ -34,13 +34,14 @@ type Change = {
   b1h: "Yes" | "No";
   b4h: "Yes" | "No";
   b1d: "Yes" | "No";
+  anyYes: "Yes" | "No";
 };
 
 type Inputs = {
   bullish: "Bullish" | "Bearish";
   status24: number;
   dailyRank: number;
-  bb: number;
+  ac: number;
   hoursGapb424: number;
 };
 
@@ -51,7 +52,7 @@ function CurrentStatus_V2() {
     bullish: "Bullish",
     status24: 6,
     dailyRank: 50,
-    bb: 0.8,
+    ac: 0.8,
     hoursGapb424: 0,
   });
   const [data /*timer*/] = useKlineData();
@@ -88,7 +89,7 @@ function CurrentStatus_V2() {
   const [changeinpercent, setchangeinpercent] = useState<Change[]>([]);
   //const [weekly /*setweekly*/] = useState(false);
 
-  function calcBB(
+  function calac(
     klinedata: {
       o: number;
       h: number;
@@ -99,66 +100,68 @@ function CurrentStatus_V2() {
     _pair: string,
     timeframe: string
   ): "Yes" | "No" {
-    let bb5mObj = new BollingerBands();
-    let bb5mUpper = 0;
-    let bb5mLower = 0;
-    let temp: {
-      lower: number;
-      middle: number;
-      upper: number;
-    } = { lower: 0, middle: 0, upper: 0 };
-    type BBarray = {
-      upper: number;
-      lower: number;
-      width: number;
+    let acObj = new AC();
+    //let acUpper = 0;
+
+    let temp: number = 0;
+    type acarray = {
+      value: number;
       price: number;
     }[];
-    let BBlist: BBarray = [];
+    let aclist: acarray = [];
+    //console.log(klinedata, _pair, timeframe);
+
     for (let x = klinedata.length - 1; x >= 0; x--) {
-      temp = bb5mObj.nextValue(klinedata[x].c);
+      temp = acObj.nextValue(klinedata[x].h, klinedata[x].l);
       if (temp) {
-        bb5mUpper = temp.upper;
-        bb5mLower = temp.lower;
-        BBlist.push({
-          upper: temp.upper,
-          lower: temp.lower,
-          width: temp.upper - temp.lower,
+        aclist.push({
+          value: temp,
           price: klinedata[x].c,
         });
       }
     }
 
-    BBlist = BBlist.slice(BBlist.length - 49, BBlist.length);
-    let maxw = 0;
-    let maxindex = 0;
-    for (let x = BBlist.length - 1; x >= 0; x--) {
-      if (BBlist[x].width > maxw) {
-        maxw = BBlist[x].width;
-        maxindex = x;
+    //aclist = aclist.slice(aclist.length - 49, aclist.length);
+    let lowaclist: { indx: number; price: number; val: number }[] = [];
+
+    for (let x = aclist.length - 1; x >= 0; x--) {
+      if (aclist[x].value < 0) {
+        lowaclist.push({
+          indx: x,
+          price: aclist[x].price,
+          val: aclist[x].value,
+        });
+      }
+    }
+    //console.log(lowaclist, _pair, timeframe);
+
+    let acListHighs: { max: number }[] = [];
+    if (lowaclist.length > 0) {
+      let max = lowaclist[0].val;
+
+      let lastindex = lowaclist[0].indx;
+      for (let x = 1; x < lowaclist.length; x++) {
+        if (lastindex == lowaclist[x].indx + 1) {
+          if (max > lowaclist[x].val) {
+            max = lowaclist[x].val;
+          }
+          lastindex--;
+        } else {
+          acListHighs.push({ max });
+          lastindex = lowaclist[x].indx;
+          max = lowaclist[x].val;
+        }
+        if (x == lowaclist.length - 1) acListHighs.push({ max });
       }
     }
 
-    let minw = 999999999;
-    let minindex = maxindex;
-    for (let x = minindex + 1; x < BBlist.length; x++) {
-      if (BBlist[x].width < minw) {
-        minw = BBlist[x].width;
-        minindex = x;
-      }
-    }
-
-    // console.log(
-    //   (klinedata[0].c - bb5mLower) / (bb5mUpper - bb5mLower),
-    //   pair,
-    //   temp
-    // );
-    //console.log(klinedata, pair);
+    //console.log(acListHighs, _pair, timeframe);
 
     if (temp) {
       let sum = 0;
-      let bbpercent = (klinedata[0].c - bb5mLower) / (bb5mUpper - bb5mLower);
+
       klinedata.slice(0, 25).forEach((item) => (sum = sum + item.v));
-      let vma = sum / 25;
+      //let vma = sum / 25;
       let high6candlevol = klinedata[0].v;
       klinedata.slice(1, 6).forEach((item) => {
         if (item.v > high6candlevol) high6candlevol = item.v;
@@ -166,68 +169,73 @@ function CurrentStatus_V2() {
       let closesum = klinedata.slice(0, 100).map((item) => item.c);
       let ma50 = closesum.slice(0, 50).reduce((a, b) => a + b) / 50;
       let ma100 = closesum.slice(0, 100).reduce((a, b) => a + b) / 100;
-      //console.log(_pair, ma100, closesum.slice(0, 100));
 
-      // console.log(
-      //   BBlist[BBlist.length - 1].lower,
-      //   BBlist[BBlist.length - 1].price,
-      //   BBlist[BBlist.length - 1].lower * 1.01 <
-      //     BBlist[BBlist.length - 1].price,
-      //   _pair,
-      //   timeframe
-      // );
-
+      let status: number = 0;
+      if (acListHighs.length > 0) {
+        let prev: number = acListHighs[0].max;
+        for (let x = 1; x < acListHighs.length; x++) {
+          if (prev > acListHighs[x].max) {
+            status++;
+          }
+          prev = acListHighs[x].max;
+        }
+      }
       if (
         //vma * 2 < high6candlevol &&
-        //(temp.upper / temp.lower < 1.025 || bbpercent < 0.5) &&
-        BBlist[BBlist.length - 1].lower * 1.01 >
-          BBlist[BBlist.length - 1].price &&
+
         //klinedata[0].c > ma50 &&
         //klinedata[0].c > ma100 &&
+        status > 2 &&
         timeframe == "5m"
       )
         return "Yes";
 
       if (
         //vma * 2 < high6candlevol &&
-        //(temp.upper / temp.lower < 1.025 || bbpercent < 0.5) &&
-        BBlist[BBlist.length - 1].lower * 1.01 >
-          BBlist[BBlist.length - 1].price &&
+        //(temp.upper / temp.lower < 1.025 || acpercent < 0.5) &&
+        // aclist[aclist.length - 1].lower * 1.01 >
+        //   aclist[aclist.length - 1].price &&
+
         //klinedata[0].c > ma50 &&
         //klinedata[0].c > ma100 &&
+
+        status > 2 &&
         timeframe == "15m"
       )
         return "Yes";
 
       if (
         //vma * 2 < high6candlevol &&
-        // (temp.upper / temp.lower > 1.1 || bbpercent > 0.5) &&
+        // (temp.upper / temp.lower > 1.1 || acpercent > 0.5) &&
         // klinedata[0].c > ma50 &&
         // klinedata[0].c > ma100 &&
-        // BBlist[BBlist.length - 1].lower * 1.01 >
-        //   BBlist[BBlist.length - 1].price &&
-        bbpercent > 0.5 &&
+        // aclist[aclist.length - 1].lower * 1.01 >
+        //   aclist[aclist.length - 1].price &&
+
         klinedata[0].c > ma50 &&
         klinedata[0].c > ma100 &&
+        status > 2 &&
         timeframe == "1h"
       )
         return "Yes";
 
       if (
         // vma < high6candlevol &&
-        // (temp.upper / temp.lower > 1.1 || bbpercent > 0.5) &&
-        bbpercent > 0.5 &&
+        // (temp.upper / temp.lower > 1.1 || acpercent > 0.5) &&
+
         klinedata[0].c > ma50 &&
         klinedata[0].c > ma100 &&
+        status > 2 &&
         timeframe == "4h"
       )
         return "Yes";
 
       if (
-        vma < high6candlevol &&
-        (temp.upper / temp.lower > 1.1 || bbpercent > 0.5) &&
+        //vma < high6candlevol &&
+        //(temp.upper / temp.lower > 1.1 || acpercent > 0.5) &&
         klinedata[0].c > ma50 &&
         klinedata[0].c > ma100 &&
+        status > 2 &&
         timeframe == "1d"
       )
         return "Yes";
@@ -248,7 +256,7 @@ function CurrentStatus_V2() {
 
         //5minute Volume CAlc
         //let sum5mv = 0;
-        let b5m = calcBB(klinedata, item, "5m");
+        let b5m = calac(klinedata, item, "5m");
 
         //15 minute Volume CAlc
         let b15m: "Yes" | "No" = "No";
@@ -257,7 +265,7 @@ function CurrentStatus_V2() {
           .filter((item) => item.timeframe == "15m")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        b15m = calcBB(klinedata, item, "15m");
+        b15m = calac(klinedata, item, "15m");
 
         let b1h: "Yes" | "No" = "No";
         let b4h: "Yes" | "No" = "No";
@@ -269,7 +277,7 @@ function CurrentStatus_V2() {
           .filter((item) => item.timeframe == "1h")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        b1h = calcBB(klinedata, item, "1h");
+        b1h = calac(klinedata, item, "1h");
 
         //Calculating last6 hours status
         let PercentStatusb424hr: "Bullish" | "Bearish" = "Bearish";
@@ -294,7 +302,7 @@ function CurrentStatus_V2() {
           .filter((item) => item.timeframe == "4h")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        b4h = calcBB(klinedata, item, "4h");
+        b4h = calac(klinedata, item, "4h");
 
         //1 Day Volume CAlc
 
@@ -302,7 +310,7 @@ function CurrentStatus_V2() {
           .filter((item) => item.timeframe == "1d")[0]
           .kline.filter((klineitem) => klineitem.pair == item)[0].data;
 
-        b1d = calcBB(klinedata, item, "1d");
+        b1d = calac(klinedata, item, "1d");
         let sortedDaily = dailydata.sort(
           (
             i: { priceChangePercent: number },
@@ -327,6 +335,14 @@ function CurrentStatus_V2() {
           b1d,
           b5m,
           green15m,
+          anyYes:
+            b5m == "Yes" ||
+            b15m == "Yes" ||
+            b1h == "Yes" ||
+            b4h == "Yes" ||
+            b1d == "Yes"
+              ? "Yes"
+              : "No",
         };
       });
       //console.log(temparray);
@@ -492,7 +508,7 @@ function CurrentStatus_V2() {
       status24: Number(data.status24),
       bullish: data.bullish,
       dailyRank: Number(data.dailyRank),
-      bb: Number(data.bb),
+      ac: Number(data.ac),
       hoursGapb424: Number(data.hoursGapb424),
     });
   };
@@ -553,10 +569,10 @@ function CurrentStatus_V2() {
               <MenuItem value="3">3</MenuItem>
               <MenuItem value="4">4</MenuItem>
             </Select>
-            <Typography>BB%</Typography>
+            <Typography>ac%</Typography>
             <Select
-              defaultValue={filter.bb}
-              {...register("bb", { required: true })}
+              defaultValue={filter.ac}
+              {...register("ac", { required: true })}
             >
               <MenuItem value="0.6">0.6</MenuItem>
               <MenuItem value="0.7">0.7</MenuItem>
@@ -635,85 +651,88 @@ function CurrentStatus_V2() {
                 //   item.dailyIndex != null
                 //     ? item.dailyIndex < filter.dailyRank
                 //     : false
-                // )
-                return (
-                  <TableRow key={item.pair}>
-                    <TableCell align="center">{++indexdisplay}</TableCell>
-                    <TableCell align="center">
-                      {
-                        <Link
-                          href={`https://www.tradingview.com/chart/V7sMPZg2/?symbol=BINANCE:${item.pair}`}
-                          target="_blank"
-                          underline="hover"
-                        >
-                          {item.pair}
-                        </Link>
-                      }
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={
-                          item.PercentStatusb424hr == "Bullish"
-                            ? "success"
-                            : "error"
+                if (item.anyYes == "Yes")
+                  // )
+                  return (
+                    <TableRow key={item.pair}>
+                      <TableCell align="center">{++indexdisplay}</TableCell>
+                      <TableCell align="center">
+                        {
+                          <Link
+                            href={`https://www.tradingview.com/chart/V7sMPZg2/?symbol=BINANCE:${item.pair}`}
+                            target="_blank"
+                            underline="hover"
+                          >
+                            {item.pair}
+                          </Link>
                         }
-                      >
-                        {item.PercentStatusb424hr}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">{item.dailyIndex}</TableCell>
-                    <TableCell align="center">{item.dailypercent} %</TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.green15m == "Yes" ? "success" : "error"}
-                      >
-                        {item.green15m}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.b5m == "Yes" ? "success" : "error"}
-                      >
-                        {item.b5m}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.b15m == "Yes" ? "success" : "error"}
-                      >
-                        {item.b15m}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.b1h == "Yes" ? "success" : "error"}
-                      >
-                        {item.b1h}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.b4h == "Yes" ? "success" : "error"}
-                      >
-                        {item.b4h}
-                      </Button>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant={"contained"}
-                        color={item.b1d == "Yes" ? "success" : "error"}
-                      >
-                        {item.b1d}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={
+                            item.PercentStatusb424hr == "Bullish"
+                              ? "success"
+                              : "error"
+                          }
+                        >
+                          {item.PercentStatusb424hr}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">{item.dailyIndex}</TableCell>
+                      <TableCell align="center">
+                        {item.dailypercent} %
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.green15m == "Yes" ? "success" : "error"}
+                        >
+                          {item.green15m}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.b5m == "Yes" ? "success" : "error"}
+                        >
+                          {item.b5m}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.b15m == "Yes" ? "success" : "error"}
+                        >
+                          {item.b15m}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.b1h == "Yes" ? "success" : "error"}
+                        >
+                          {item.b1h}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.b4h == "Yes" ? "success" : "error"}
+                        >
+                          {item.b4h}
+                        </Button>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant={"contained"}
+                          color={item.b1d == "Yes" ? "success" : "error"}
+                        >
+                          {item.b1d}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
               })}
             </TableBody>
           </Table>
