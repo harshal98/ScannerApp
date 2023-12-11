@@ -155,8 +155,6 @@ function CurrentStatus_V2() {
       }
     }
 
-    //console.log(acListHighs, _pair, timeframe);
-
     if (temp) {
       let sum = 0;
 
@@ -170,6 +168,9 @@ function CurrentStatus_V2() {
       let ma50 = closesum.slice(0, 50).reduce((a, b) => a + b) / 50;
       let ma100 = closesum.slice(0, 100).reduce((a, b) => a + b) / 100;
 
+      acListHighs = acListHighs.slice(0, 4);
+
+      console.log(acListHighs, _pair, timeframe);
       let status: number = 0;
       if (acListHighs.length > 0) {
         let prev: number = acListHighs[0].max;
@@ -185,7 +186,8 @@ function CurrentStatus_V2() {
 
         //klinedata[0].c > ma50 &&
         //klinedata[0].c > ma100 &&
-        status > 2 &&
+        status > 1 &&
+        //aclist[aclist.length - 1].value < 0 &&
         timeframe == "5m"
       )
         return "Yes";
@@ -199,7 +201,9 @@ function CurrentStatus_V2() {
         //klinedata[0].c > ma50 &&
         //klinedata[0].c > ma100 &&
 
-        status > 2 &&
+        status > 1 &&
+        //aclist[aclist.length - 1].value < 0 &&
+
         timeframe == "15m"
       )
         return "Yes";
@@ -214,7 +218,8 @@ function CurrentStatus_V2() {
 
         klinedata[0].c > ma50 &&
         klinedata[0].c > ma100 &&
-        status > 2 &&
+        status > 1 &&
+        //aclist[aclist.length - 1].value < 0 &&
         timeframe == "1h"
       )
         return "Yes";
@@ -225,7 +230,8 @@ function CurrentStatus_V2() {
 
         klinedata[0].c > ma50 &&
         klinedata[0].c > ma100 &&
-        status > 2 &&
+        //aclist[aclist.length - 1].value < 0 &&
+        status > 1 &&
         timeframe == "4h"
       )
         return "Yes";
@@ -235,7 +241,7 @@ function CurrentStatus_V2() {
         //(temp.upper / temp.lower > 1.1 || acpercent > 0.5) &&
         klinedata[0].c > ma50 &&
         klinedata[0].c > ma100 &&
-        status > 2 &&
+        status > 1 &&
         timeframe == "1d"
       )
         return "Yes";
