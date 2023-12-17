@@ -230,6 +230,7 @@ function CurrentStatus_V2() {
         //klinedata[0].c > ma100 &&
         lowstatus > 0 &&
         highstatus > 0 &&
+        aclist[aclist.length - 1].value < 0 &&
         //aclist[aclist.length - 1].value < 0 &&
         timeframe == "5m"
       )
@@ -246,6 +247,7 @@ function CurrentStatus_V2() {
 
         lowstatus > 0 &&
         highstatus > 0 &&
+        aclist[aclist.length - 1].value < 0 &&
         //aclist[aclist.length - 1].value < 0 &&
 
         timeframe == "15m"
@@ -264,6 +266,7 @@ function CurrentStatus_V2() {
         klinedata[0].c > ma100 &&
         lowstatus > 0 &&
         highstatus > 0 &&
+        aclist[aclist.length - 1].value < 0 &&
         //aclist[aclist.length - 1].value < 0 &&
         timeframe == "1h"
       )
@@ -333,7 +336,7 @@ function CurrentStatus_V2() {
         //Calculating last6 hours status
         let PercentStatusb424hr: "Bullish" | "Bearish" = "Bearish";
         let high46h = 0;
-        klinedata.slice(24 - 1 * filter.status24, 24 - 2).forEach((item) => {
+        klinedata.slice(24 - 2 - 1, 24 - 2 + 1).forEach((item) => {
           if (high46h < item.c) high46h = item.c;
         });
         // let low4 = 999999;
@@ -343,7 +346,7 @@ function CurrentStatus_V2() {
 
         //console.log(klinedata.slice(20, 24), item);
 
-        if (klinedata[0].c * 0.98 > high46h) PercentStatusb424hr = "Bullish";
+        if (klinedata[0].c * 1.02 > high46h) PercentStatusb424hr = "Bullish";
         //console.log(sum1hv / 25, klinedata, item);
 
         //4 hour Volume CAlc
