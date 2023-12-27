@@ -266,7 +266,6 @@ function CurrentStatus_V2() {
         klinedata[0].c > ma100 &&
         lowstatus > 0 &&
         highstatus > 0 &&
-        aclist[aclist.length - 1].value < 0 &&
         //aclist[aclist.length - 1].value < 0 &&
         timeframe == "1h"
       )
