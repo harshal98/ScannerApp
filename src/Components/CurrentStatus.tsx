@@ -46,7 +46,7 @@ function CurrentStatus() {
   // }[] = [];
   const [sort, setsort] = useState<{ sortby: string; asc: boolean }[]>([
     {
-      sortby: "daily",
+      sortby: "high",
       asc: true,
     },
   ]);
